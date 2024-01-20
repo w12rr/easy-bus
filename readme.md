@@ -9,23 +9,54 @@ Kafka, RabbitMQ, etc and provide easy switching between them
 2. The second purpose is to provide the most easiest API, this can be described by: **You see the example code, you know how to use it**, let's try to achieve it 
 
 ## What have to be done
-Investigate the final api that we will use, define the final project structure.
-This can be done during implementing three first buses:
-1. ASB (Azure Service Bus)
-2. RabbitMQ
-3. Kafka
+Investigate the final api that we will use, define the final project structure (POC have to be created).
+The Api should look like that:
 
-When any bus will be implemented we will start to make these:
-   1. Implement Outbox Pattern
-      1. Supporting EntityFramework as outbox stores
-      2. Supporting ADO.NET as outbox stores
-   2. Implement Inbox Pattern
-      1. Supporting EntityFramework as inbox stores
-      2. Supporting ADO.NET as inbox stores
-   3. Implement Saga Pattern
+```csharp
+var services = new ServiceCollection();
 
-### ASB
-TODO
+services.AddMessageQueue(config =>
+{
+    config.AddAzureServiceBus("Asb", asbOpt =>
+    {
+        asbOpt.SomeProp = "some-values";
+        asbOpt.SomeProp2 = "some-values";
+    });
+    config.AddAzureServiceBus("Asb2", asbOpt =>
+    {
+        asbOpt.SomeProp = "some-values";
+        asbOpt.SomeProp2 = "some-values";
+    });
+    config.AddKafka("kafka", kafkaOpt =>
+    {
+        kafkaOpt.SomeProp = "some-values";
+        kafkaOpt.SomeProp2 = "some-values";
+    });
+
+    config.AddPublisher(pub =>
+    {
+        pub.AddAzureServiceBusEventPublisher<SomeEvent>("Asb");
+        pub.AddKafkaEventPublisher<SomeEvent2>("kafka");
+        pub.AddAzureServiceBusEventPublisher<SomeEvent3>("Asb2");
+    });
+
+    config.AddReceiver(rec =>
+    {
+        rec.AddAzureServiceBusEventReceiver<SomeEvent>("Asb");
+    });
+});
+
+await using var sp = services.BuildServiceProvider();
+var publisher = sp.GetRequiredService<IPublisher>();
+
+await publisher.Publish(new SomeEvent(), CancellationToken.None);
+
+public sealed record SomeEvent;
+public sealed record SomeEvent2;
+public sealed record SomeEvent3;
+```
+
+
 
 ## Vision of the API
 During startup (DI configuration), we define how particular events are received/published
