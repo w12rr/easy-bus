@@ -1,12 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedCore.Messaging.AzureServiceBus", "src\SharedCore.Messaging.AzureServiceBus\SharedCore.Messaging.AzureServiceBus.csproj", "{433E68C5-2F5A-40E0-B052-54CD200B7E99}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyBus.AzureServiceBus", "src\EasyBus.AzureServiceBus\EasyBus.AzureServiceBus.csproj", "{433E68C5-2F5A-40E0-B052-54CD200B7E99}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedCore.Messaging.Core", "src\SharedCore.Messaging.Core\SharedCore.Messaging.Core.csproj", "{CABF00B7-72B7-431A-84EA-02EB25F42837}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyBus.Core", "src\EasyBus.Core\EasyBus.Core.csproj", "{CABF00B7-72B7-431A-84EA-02EB25F42837}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedCore.Messaging.Infrastructure", "src\SharedCore.Messaging.Infrastructure\SharedCore.Messaging.Infrastructure.csproj", "{7DC301C0-82E9-4329-9D95-597012BE826A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyBus.Infrastructure", "src\EasyBus.Infrastructure\EasyBus.Infrastructure.csproj", "{7DC301C0-82E9-4329-9D95-597012BE826A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedCore.Messaging.Example", "src\SharedCore.Messaging.Example\SharedCore.Messaging.Example.csproj", "{576612A7-A160-483A-9653-1542DBC8A8D1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyBus.Example", "src\EasyBus.Example\EasyBus.Example.csproj", "{576612A7-A160-483A-9653-1542DBC8A8D1}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Items", "Items", "{CA3CD903-351A-4E94-A4BD-0A2C2816BBB8}"
 	ProjectSection(SolutionItems) = preProject
