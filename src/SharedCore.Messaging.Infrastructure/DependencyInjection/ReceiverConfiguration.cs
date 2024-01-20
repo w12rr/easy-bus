@@ -1,6 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Hosting;
 using SharedCore.Messaging.Core.Definitions;
 using SharedCore.Messaging.Core.Receiving;
 
@@ -33,9 +32,9 @@ public class ReceiverConfiguration
         _services.TryAddScoped<TService, TImpl>();
     }
 
-    public void AddReceiverHostedServices<THostedService>() 
-        where THostedService : class, IHostedService
-    {
-        _services.AddHostedService<THostedService>();
-    }
+    // public void AddReceiverHostedServices<THostedService>() 
+        // where THostedService : class, IHostedService
+    // {
+        // _services.AddHostedService<THostedService>();
+    // }
 }

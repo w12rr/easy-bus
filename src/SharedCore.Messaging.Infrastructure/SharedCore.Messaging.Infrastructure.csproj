@@ -7,8 +7,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\SharedCore.Infrastructure\SharedCore.Infrastructure.csproj" />
       <ProjectReference Include="..\SharedCore.Messaging.Core\SharedCore.Messaging.Core.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.1" />
     </ItemGroup>
 
 </Project>

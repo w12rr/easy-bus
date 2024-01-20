@@ -1,14 +1,8 @@
-﻿using MediatR;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using SharedCore.Features.DistributedLock.AzureBlob;
 using SharedCore.Messaging.AzureServiceBus.DependencyInjection;
-using SharedCore.Messaging.Inbox;
-using SharedCore.Messaging.Inbox.Persistence;
-using SharedCore.Messaging.Inbox.Persistence.Entities;
+using SharedCore.Messaging.Core.Publishing;
 using SharedCore.Messaging.Infrastructure.DependencyInjection;
-using SharedCore.Messaging.Outbox;
 
 namespace SharedCore.Messaging.Example;
 
@@ -20,7 +14,7 @@ public static class Program
         var configuration = new ConfigurationBuilder()
             .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true).Build();
 
-        services.AddAzureBlobDistributedLock(configuration.GetSection("DistributedLock:AzureBlob"));
+        // services.AddAzureBlobDistributedLock(configuration.GetSection("DistributedLock:AzureBlob"));
         services.AddMessageQueue(config =>
         {
             config.AddAzureServiceBus("Asd", configuration.GetSection("Mq:AzureServiceBus:Asd"));
@@ -28,15 +22,15 @@ public static class Program
             config.AddPublisher(pub =>
             {
                 pub.AddAzureServiceBusEventPublisher<SomeEvent>("Asd");
-                pub.AddOutboxStore<AppDbContext>();
-                pub.AddOutboxMessageProducer<AppDbContext>();
+                // pub.AddOutboxStore<AppDbContext>();
+                // pub.AddOutboxMessageProducer<AppDbContext>();
             });
 
             config.AddReceiver(rec =>
             {
                 rec.AddAzureServiceBusEventReceiver<SomeEvent>("Asd");
-                rec.AddInboxStore<AppDbContext>();
-                rec.AddInboxMessageConsumer<AppDbContext>();
+                // rec.AddInboxStore<AppDbContext>();
+                // rec.AddInboxMessageConsumer<AppDbContext>();
             });
         });
 
@@ -47,16 +41,16 @@ public static class Program
     }
 }
 
-public sealed class AppDbContext : DbContext, IInboxDbContext
-{
-    public DbSet<InboxMessage> InboxMessages { get; set; } = default!;
+// public sealed class AppDbContext : DbContext, IInboxDbContext
+// {
+    // public DbSet<InboxMessage> InboxMessages { get; set; } = default!;
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        modelBuilder.ConfigureInboxEntity();
-        base.OnModelCreating(modelBuilder);
-    }
-}
+    // protected override void OnModelCreating(ModelBuilder modelBuilder)
+    // {
+        // modelBuilder.ConfigureInboxEntity();
+        // base.OnModelCreating(modelBuilder);
+    // }
+// }
 
 public sealed record SomeEvent
 {

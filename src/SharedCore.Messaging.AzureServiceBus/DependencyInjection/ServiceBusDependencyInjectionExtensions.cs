@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using SharedCore.Abstraction.Services;
 using SharedCore.Messaging.AzureServiceBus.Options;
@@ -15,17 +13,17 @@ namespace SharedCore.Messaging.AzureServiceBus.DependencyInjection;
 public static class ServiceBusDependencyInjectionExtensions
 {
     public static void AddAzureServiceBus(this MessageQueueConfiguration mqConfiguration, string name,
-        IConfigurationSection configuration)
+        object configuration)
     {
-        mqConfiguration.AddMessageQueueOptions<AzureServiceBusOptions, AzureServiceBusOptionsValidator>();
+        mqConfiguration.AddMessageQueueOptions<AzureServiceBusOptions>();
         mqConfiguration.PostConfigureMessageQueueOptions<AzureServiceBusOptions>(option =>
         {
-            option.Connections.Add(name, configuration.Get<ServiceBusConnectionOptions>().AssertNull());
+            // option.Connections.Add(name, configuration.Get<ServiceBusConnectionOptions>().AssertNull());
         });
         mqConfiguration.AddMessageQueue(sp => new AzureServiceBus(
             sp.GetRequiredService<IOptions<AzureServiceBusOptions>>().Value.Connections[name],
             name,
-            sp.GetRequiredService<ILogger<AzureServiceBus>>(),
+            // sp.GetRequiredService<ILogger<AzureServiceBus>>(),
             sp.GetRequiredService<IMessageReceiver>()));
     }
 

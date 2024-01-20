@@ -6,8 +6,4 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
-    <ItemGroup>
-      <ProjectReference Include="..\SharedCore.Features.MediatR\SharedCore.Features.MediatR.csproj" />
-    </ItemGroup>
-
 </Project>

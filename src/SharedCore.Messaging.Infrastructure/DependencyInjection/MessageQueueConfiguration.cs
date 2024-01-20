@@ -1,7 +1,4 @@
-﻿using FluentValidation;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using SharedCore.Features.FluentValidation;
+﻿using Microsoft.Extensions.DependencyInjection;
 using SharedCore.Messaging.Core;
 using SharedCore.Messaging.Core.Publishing;
 using SharedCore.Messaging.Core.Receiving;
@@ -28,17 +25,16 @@ public class MessageQueueConfiguration
     public void AddReceiver(Action<ReceiverConfiguration> config)
     {
         _services.AddScoped<IReceiver, Receiver>();
-        _services.AddHostedService<ReceiverHostedService>();
+        // _services.AddHostedService<ReceiverHostedService>();
         var receiverConfig = new ReceiverConfiguration(_services);
-        receiverConfig.AddMessageReceiver<SimpleMessageReceiver>();
+        // receiverConfig.AddMessageReceiver<SimpleMessageReceiver>();
         config(receiverConfig);
     }
 
-    public void AddMessageQueueOptions<TOption, TValidator>()
+    public void AddMessageQueueOptions<TOption>()
         where TOption : class
-        where TValidator : AbstractValidator<TOption>, IValidateOptions<TOption>
     {
-        _services.AddValidatedOptions<TOption, TValidator>();
+        _services.AddOptions<TOption>();
     }
 
     public void PostConfigureMessageQueueOptions<T>(Action<T> configure)

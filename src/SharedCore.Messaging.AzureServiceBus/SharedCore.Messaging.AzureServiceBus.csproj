@@ -7,8 +7,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\SharedCore.Features.MediatR\SharedCore.Features.MediatR.csproj" />
-      <ProjectReference Include="..\SharedCore.Infrastructure\SharedCore.Infrastructure.csproj" />
       <ProjectReference Include="..\SharedCore.Messaging.Infrastructure\SharedCore.Messaging.Infrastructure.csproj" />
     </ItemGroup>
 

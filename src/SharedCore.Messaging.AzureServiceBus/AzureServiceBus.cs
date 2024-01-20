@@ -1,5 +1,4 @@
 ﻿using Azure.Messaging.ServiceBus;
-using Microsoft.Extensions.Logging;
 using SharedCore.Messaging.AzureServiceBus.Options;
 using SharedCore.Messaging.AzureServiceBus.Publishing.Definitions;
 using SharedCore.Messaging.AzureServiceBus.Receiving;
@@ -13,16 +12,16 @@ namespace SharedCore.Messaging.AzureServiceBus;
 
 public class AzureServiceBus : IMessageQueue, IAsyncDisposable
 {
-    private readonly ILogger<AzureServiceBus> _logger;
     private readonly IMessageReceiver _messageReceiver;
     private readonly ServiceBusClient _client;
     private readonly SortedDictionary<string, IRichServiceBusProcessor> _serviceBusProcessors = new();
-    private readonly SortedDictionary<string, IAzureServiceBusTopicEventReceiverDefinition> _receiversDefinitionsByProcessorId = new();
-    
+
+    private readonly SortedDictionary<string, IAzureServiceBusTopicEventReceiverDefinition>
+        _receiversDefinitionsByProcessorId = new();
+
     public AzureServiceBus(ServiceBusConnectionOptions connectionOptions, string name,
-        ILogger<AzureServiceBus> logger, IMessageReceiver messageReceiver)
+        IMessageReceiver messageReceiver)
     {
-        _logger = logger;
         _messageReceiver = messageReceiver;
         _client = new ServiceBusClient(connectionOptions.ConnectionString);
         Name = name;
@@ -64,7 +63,7 @@ public class AzureServiceBus : IMessageQueue, IAsyncDisposable
     private Task ProcessError(ProcessErrorEventArgs arg)
     {
         var definition = _receiversDefinitionsByProcessorId[arg.Identifier];
-        definition.LogReceivingError(_logger, arg);
+        // definition.LogReceivingError(_logger, arg);
         return Task.CompletedTask;
     }
 
@@ -72,10 +71,10 @@ public class AzureServiceBus : IMessageQueue, IAsyncDisposable
     {
         var definition = _receiversDefinitionsByProcessorId[arg.Identifier];
         await _messageReceiver.Receive(
-            arg.Message.Body.ToString(), 
-            arg.Message.CorrelationId, 
-            arg.Message.MessageId, 
-            definition, 
+            arg.Message.Body.ToString(),
+            arg.Message.CorrelationId,
+            arg.Message.MessageId,
+            definition,
             arg.CancellationToken);
     }
 

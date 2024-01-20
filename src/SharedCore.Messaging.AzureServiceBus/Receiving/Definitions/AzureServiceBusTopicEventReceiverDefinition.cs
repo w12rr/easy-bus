@@ -1,6 +1,4 @@
 using Azure.Messaging.ServiceBus;
-using MediatR;
-using Microsoft.Extensions.Logging;
 using SharedCore.Messaging.AzureServiceBus.Receiving.Processors;
 using SharedCore.Messaging.Core;
 
@@ -37,21 +35,21 @@ public class AzureServiceBusTopicEventReceiverDefinition<T> : IAzureServiceBusTo
         return new RichServiceBusProcessor(client.CreateProcessor(_topicName, _subscriptionName));
     }
 
-    public INotification GetNotification(string message)
+    public object GetNotification(string message)
     {
         var @event = MqSerializer.Deserialize<T>(message);
-        return new EventWrapper<T>(@event);
+        return new object();// new EventWrapper<T>(@event);
     }
 
-    public void LogReceivingError(ILogger<AzureServiceBus> logger, ProcessErrorEventArgs processErrorEventArgs)
+    public void LogReceivingError( ProcessErrorEventArgs processErrorEventArgs)
     {
-        logger.LogCritical(
-            processErrorEventArgs.Exception,
-            "Got exception during consuming message {ProcessorId} {QualifiedNameSpace} {EntityPath} {DefinitionTypeName} {EventName}",
-            processErrorEventArgs.Identifier,
-            processErrorEventArgs.FullyQualifiedNamespace,
-            processErrorEventArgs.EntityPath,
-            GetType().Name,
-            typeof(T).Name);
+        // logger.LogCritical(
+            // processErrorEventArgs.Exception,
+            // "Got exception during consuming message {ProcessorId} {QualifiedNameSpace} {EntityPath} {DefinitionTypeName} {EventName}",
+            // processErrorEventArgs.Identifier,
+            // processErrorEventArgs.FullyQualifiedNamespace,
+            // processErrorEventArgs.EntityPath,
+            // GetType().Name,
+            // typeof(T).Name);
     }
 }
