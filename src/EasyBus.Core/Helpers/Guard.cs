@@ -69,6 +69,6 @@ public static partial class Guard
     [GeneratedRegex("\\s")]
     private static partial Regex GetWhiteSpaceRegex();
 
-    [GeneratedRegex("^.+\\@.+\\..+$")]
+    [GeneratedRegex(@"^.+\@.+\..+$")]
     private static partial Regex GetMailRegex();
 }
