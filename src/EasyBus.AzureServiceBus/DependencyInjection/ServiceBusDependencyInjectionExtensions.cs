@@ -1,10 +1,8 @@
 ﻿using EasyBus.AzureServiceBus.Options;
-using EasyBus.AzureServiceBus.Publishing.Definitions;
-using EasyBus.AzureServiceBus.Receiving.Definitions;
-using EasyBus.Core.Helpers;
-using EasyBus.Core.Receiving;
+using EasyBus.AzureServiceBus.Publishing;
+using EasyBus.AzureServiceBus.Receiving;
+using EasyBus.Core.InfrastructureWrappers;
 using EasyBus.Infrastructure.DependencyInjection;
-using EasyBus.Infrastructure.Tools;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -13,48 +11,55 @@ namespace EasyBus.AzureServiceBus.DependencyInjection;
 public static class ServiceBusDependencyInjectionExtensions
 {
     public static void AddAzureServiceBus(this MessageQueueConfiguration mqConfiguration, string name,
-        object configuration)
+        Action<ServiceBusConnectionOptions> asbOptionsConfig)
     {
-        mqConfiguration.AddMessageQueueOptions<AzureServiceBusOptions>();
-        mqConfiguration.PostConfigureMessageQueueOptions<AzureServiceBusOptions>(option =>
+        mqConfiguration.Services.AddOptions<AzureServiceBusOptions>();
+        mqConfiguration.Services.PostConfigure<AzureServiceBusOptions>(opt =>
         {
-            // option.Connections.Add(name, configuration.Get<ServiceBusConnectionOptions>().AssertNull());
+            var asbOpt = new ServiceBusConnectionOptions();
+            asbOptionsConfig(asbOpt);
+            opt.Connections.Add(name, asbOpt);
         });
-        mqConfiguration.AddMessageQueue(sp => new AzureServiceBus(
-            sp.GetRequiredService<IOptions<AzureServiceBusOptions>>().Value.Connections[name],
-            name,
-            // sp.GetRequiredService<ILogger<AzureServiceBus>>(),
-            sp.GetRequiredService<IMessageReceiver>()));
     }
 
     public static void AddAzureServiceBusEventPublisher<T>(this PublisherConfiguration configuration,
-        string messageQueueName,
-        Func<T, string>? correlationIdFactory = default)
+        string mqName,
+        string topicOrQueueName)
     {
-        configuration.AddDefinition(sp =>
+        configuration.Services.AddScoped<IInfrastructurePublisher<T>, AzureServiceBusInfrastructurePublisher<T>>(
+            sp =>
+            {
+                var options = sp.GetRequiredService<IOptions<AzureServiceBusOptions>>().Value.Connections[mqName];
+                return new AzureServiceBusInfrastructurePublisher<T>(options, topicOrQueueName);
+            });
+    }
+
+    public static void AddAzureServiceBusTopicReceiver<T, TMessageHandler>(this ReceiverConfiguration configuration,
+        string mqName,
+        string topicName,
+        string subscriptionName)
+        where TMessageHandler : class, IAzureServiceBusMessageHandler<T>
+    {
+        configuration.Services.AddScoped<IAzureServiceBusMessageHandler<T>, TMessageHandler>();
+        configuration.Services.AddScoped<IInfrastructureReceiver, AzureServiceBusTopicInfrastructureReceiver<T>>(sp =>
         {
-            var options = sp.GetRequiredService<IOptions<AzureServiceBusOptions>>().Value.Connections[messageQueueName];
-            var topicName = TopicNames.NormalizeForType<T>();
-            return new AzureServiceBusEventPublishingDefinition<T>(
-                messageQueueName,
-                Variables.TopicTemplate(options.Prefix, topicName),
-                correlationIdFactory);
+            var options = sp.GetRequiredService<IOptions<AzureServiceBusOptions>>().Value.Connections[mqName];
+            return new AzureServiceBusTopicInfrastructureReceiver<T>(options, sp.GetRequiredService<TMessageHandler>(),
+                topicName, subscriptionName);
         });
     }
 
-    public static void AddAzureServiceBusEventReceiver<T>(this ReceiverConfiguration configuration,
-        string messageQueueName,
-        bool enableSessions = false)
+    public static void AddAzureServiceBusQueueReceiver<T, TMessageHandler>(this ReceiverConfiguration configuration,
+        string mqName,
+        string queueName)
+        where TMessageHandler : class, IAzureServiceBusMessageHandler<T>
     {
-        configuration.AddDefinition(sp =>
+        configuration.Services.AddScoped<IAzureServiceBusMessageHandler<T>, TMessageHandler>();
+        configuration.Services.AddScoped<IInfrastructureReceiver, AzureServiceBusQueueInfrastructureReceiver<T>>(sp =>
         {
-            var options = sp.GetRequiredService<IOptions<AzureServiceBusOptions>>().Value.Connections[messageQueueName];
-            var topicName = TopicNames.NormalizeForType<T>();
-            return new AzureServiceBusTopicEventReceiverDefinition<T>(
-                messageQueueName,
-                Variables.TopicTemplate(options.Prefix, topicName),
-                Variables.SubscriptionTemplate(options.Prefix, topicName, options.SubscriptionSuffix.AssertNull()),
-                enableSessions);
+            var options = sp.GetRequiredService<IOptions<AzureServiceBusOptions>>().Value.Connections[mqName];
+            return new AzureServiceBusQueueInfrastructureReceiver<T>(options, sp.GetRequiredService<TMessageHandler>(),
+                queueName);
         });
     }
 }

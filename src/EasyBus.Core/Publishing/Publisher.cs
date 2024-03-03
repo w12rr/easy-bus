@@ -1,24 +1,19 @@
-﻿using EasyBus.Core.Definitions;
+﻿using EasyBus.Core.InfrastructureWrappers;
 
 namespace EasyBus.Core.Publishing;
 
 public sealed class Publisher : IPublisher
 {
-    private readonly IReadOnlyCollection<IEventPublishingDefinition> _eventPublishingDefinitions;
-    private readonly IReadOnlyCollection<IMessageQueue> _messageQueues;
+    private readonly IReadOnlyCollection<IInfrastructurePublisher> _eventPublishingDefinitions;
 
-    public Publisher(
-        IReadOnlyCollection<IEventPublishingDefinition> eventPublishingDefinitions,
-        IReadOnlyCollection<IMessageQueue> messageQueues)
+    public Publisher(IReadOnlyCollection<IInfrastructurePublisher> eventPublishingDefinitions)
     {
         _eventPublishingDefinitions = eventPublishingDefinitions;
-        _messageQueues = messageQueues;
     }
     
     public async Task Publish<T>(T @event, CancellationToken cancellationToken)
     {
-        var definition = _eventPublishingDefinitions.OfType<IEventPublishingDefinition<T>>().Single();
-        var mq = definition.SelectMessageQueue(_messageQueues);
-        await mq.Publish(definition, @event, cancellationToken);
+        var definition = _eventPublishingDefinitions.OfType<IInfrastructurePublisher<T>>().Single();
+        await definition.Publish(@event, cancellationToken);
     }
 }

@@ -2,7 +2,5 @@
 
 public sealed class ServiceBusConnectionOptions
 {
-    public required string ConnectionString { get; init; }
-    public required string Prefix { get; init; }
-    public required string? SubscriptionSuffix { get; init; } 
+    public string ConnectionString { get; set; } = string.Empty;
 }
