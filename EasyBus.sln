@@ -14,6 +14,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Items", "Items", "{CA3CD903
 		readme.md = readme.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyBus.InMemory", "src\EasyBus.InMemory\EasyBus.InMemory.csproj", "{D93465EB-CAF5-4C9B-97F4-9E357A08DB83}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,6 +38,10 @@ Global
 		{576612A7-A160-483A-9653-1542DBC8A8D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{576612A7-A160-483A-9653-1542DBC8A8D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{576612A7-A160-483A-9653-1542DBC8A8D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D93465EB-CAF5-4C9B-97F4-9E357A08DB83}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D93465EB-CAF5-4C9B-97F4-9E357A08DB83}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D93465EB-CAF5-4C9B-97F4-9E357A08DB83}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D93465EB-CAF5-4C9B-97F4-9E357A08DB83}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection

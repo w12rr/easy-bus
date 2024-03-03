@@ -51,7 +51,7 @@ public static class ServiceBusDependencyInjectionExtensions
             });
     }
 
-    public static ReceiverConfiguration<T> AddAzureServiceBusTopicReceiver<T>(this ReceiverConfiguration configuration,
+    public static AzureServiceBusReceiverPostConfiguration<T> AddAzureServiceBusTopicReceiver<T>(this ReceiverConfiguration configuration,
         string mqName,
         string topicName,
         string subscriptionName)
@@ -64,10 +64,10 @@ public static class ServiceBusDependencyInjectionExtensions
                 sp.GetRequiredService<IAzureServiceBusMessageHandler<T>>(),
                 topicName, subscriptionName);
         });
-        return new ReceiverConfiguration<T>(configuration.Services);
+        return new AzureServiceBusReceiverPostConfiguration<T>(configuration.Services);
     }
 
-    public static ReceiverConfiguration<T> AddAzureServiceBusQueueReceiver<T>(this ReceiverConfiguration configuration,
+    public static AzureServiceBusReceiverPostConfiguration<T> AddAzureServiceBusQueueReceiver<T>(this ReceiverConfiguration configuration,
         string mqName,
         string queueName)
     {
@@ -79,6 +79,6 @@ public static class ServiceBusDependencyInjectionExtensions
                 sp.GetRequiredService<IAzureServiceBusMessageHandler<T>>(),
                 queueName);
         });
-        return new ReceiverConfiguration<T>(configuration.Services);
+        return new AzureServiceBusReceiverPostConfiguration<T>(configuration.Services);
     }
 }

@@ -5,16 +5,16 @@ using Microsoft.Extensions.Logging;
 
 namespace EasyBus.AzureServiceBus.DependencyInjection;
 
-public class ReceiverConfiguration<T>
+public class AzureServiceBusReceiverPostConfiguration<T>
 {
     private readonly IServiceCollection _services;
 
-    public ReceiverConfiguration(IServiceCollection services)
+    public AzureServiceBusReceiverPostConfiguration(IServiceCollection services)
     {
         _services = services;
     }
 
-    public ReceiverConfiguration<T> AddFuncHandler(
+    public AzureServiceBusReceiverPostConfiguration<T> AddFuncHandler(
         Func<IServiceProvider, ProcessMessageEventArgs, T, Task> onSuccess,
         Func<IServiceProvider, ProcessErrorEventArgs, Task>? onError = default)
     {
@@ -28,7 +28,7 @@ public class ReceiverConfiguration<T>
         return this;
     }
 
-    public ReceiverConfiguration<T> AddFuncHandler(
+    public AzureServiceBusReceiverPostConfiguration<T> AddFuncHandler(
         Func<IServiceProvider, T, Task<bool>> onSuccess,
         Func<IServiceProvider, ProcessErrorEventArgs, Task>? onError = default)
     {

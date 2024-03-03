@@ -2,7 +2,9 @@
 using EasyBus.AzureServiceBus.DependencyInjection;
 using EasyBus.AzureServiceBus.Receiving;
 using EasyBus.Core.Publishing;
+using EasyBus.Example;
 using EasyBus.Infrastructure.DependencyInjection;
+using EasyBus.InMemory.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -13,9 +15,11 @@ var configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json", o
 services.AddMessageQueue(config =>
 {
     config.AddAzureServiceBus("Asd", opt => configuration.GetSection("Mq:AzureServiceBus:Asd").Bind(opt));
-
+    config.AddInMemoryMq();
+    
     config.AddPublisher(pub =>
     {
+        //IF PROD
         pub.AddAzureServiceBusEventPublisher<SomeEvent>(
             "Asd", 
             "my-topic",
@@ -23,15 +27,24 @@ services.AddMessageQueue(config =>
             {
                 message.CorrelationId = @event.ToString();
             });
+        
+        //IF LOCAL
+        pub.AddInMemoryEventPublisher<SomeEvent>();
+        
         // pub.AddOutboxStore<AppDbContext>();
         // pub.AddOutboxMessageProducer<AppDbContext>();
     });
 
     config.AddReceiver(rec =>
     {
+        //IF PROD
         rec.AddAzureServiceBusTopicReceiver<SomeEvent>("Asd", "topic", "subscription")
             .AddFuncHandler(HandleAnyMessage);
         rec.AddAzureServiceBusQueueReceiver<SomeEvent>("Asd", "queue")
+            .AddFuncHandler(HandleAnyMessage);
+        
+        //IF LOCAL
+        rec.AddInMemoryReceiver<SomeEvent>()
             .AddFuncHandler(HandleAnyMessage);
     });
 });
@@ -48,18 +61,20 @@ static Task<bool> HandleAnyMessage<T>(IServiceProvider sp, T @event)
     return Task.FromResult(true);
 }
 
-public sealed record SomeEvent;
-
-public sealed class SomeEventReceiver : IAzureServiceBusMessageHandler<SomeEvent>
+namespace EasyBus.Example
 {
-    public Task MessageHandler(ProcessMessageEventArgs args, SomeEvent @event)
-    {
-        throw new NotImplementedException();
-    }
+    public sealed record SomeEvent;
 
-    public Task ErrorHandler(ProcessErrorEventArgs args)
+    public sealed class SomeEventReceiver : IAzureServiceBusMessageHandler<SomeEvent>
     {
-        throw new NotImplementedException();
+        public Task MessageHandler(ProcessMessageEventArgs args, SomeEvent @event)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task ErrorHandler(ProcessErrorEventArgs args)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
-

@@ -9,6 +9,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\EasyBus.AzureServiceBus\EasyBus.AzureServiceBus.csproj" />
+      <ProjectReference Include="..\EasyBus.InMemory\EasyBus.InMemory.csproj" />
     </ItemGroup>
 
     <ItemGroup>
