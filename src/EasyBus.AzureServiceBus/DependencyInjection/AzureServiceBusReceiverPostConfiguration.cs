@@ -14,7 +14,7 @@ public class AzureServiceBusReceiverPostConfiguration<T>
         _services = services;
     }
 
-    public AzureServiceBusReceiverPostConfiguration<T> AddFuncHandler(
+    public AzureServiceBusReceiverPostConfiguration<T> SetFuncHandler(
         Func<IServiceProvider, ProcessMessageEventArgs, T, Task> onSuccess,
         Func<IServiceProvider, ProcessErrorEventArgs, Task>? onError = default)
     {
@@ -28,11 +28,17 @@ public class AzureServiceBusReceiverPostConfiguration<T>
         return this;
     }
 
-    public AzureServiceBusReceiverPostConfiguration<T> AddFuncHandler(
-        Func<IServiceProvider, T, Task<bool>> onSuccess,
+    public AzureServiceBusReceiverPostConfiguration<T> SetHandler<THandler>()
+        where THandler : class, IAzureServiceBusMessageHandler<T>
+    {
+        _services.AddScoped<IAzureServiceBusMessageHandler<T>, THandler>();
+        return this;
+    }
+
+    public AzureServiceBusReceiverPostConfiguration<T> SetFuncHandler(Func<IServiceProvider, T, Task<bool>> onSuccess,
         Func<IServiceProvider, ProcessErrorEventArgs, Task>? onError = default)
     {
-        AddFuncHandler(
+        SetFuncHandler(
             async (sp, args, @event) =>
             {
                 if (await onSuccess(sp, @event))
