@@ -1,4 +1,8 @@
-﻿using EasyBus.AzureServiceBus.Options;
+﻿using System.Text.Json;
+using Azure.Core;
+using Azure.Identity;
+using Azure.Messaging.ServiceBus;
+using EasyBus.AzureServiceBus.Options;
 using EasyBus.AzureServiceBus.Publishing;
 using EasyBus.AzureServiceBus.Receiving;
 using EasyBus.Core.InfrastructureWrappers;
@@ -24,42 +28,57 @@ public static class ServiceBusDependencyInjectionExtensions
 
     public static void AddAzureServiceBusEventPublisher<T>(this PublisherConfiguration configuration,
         string mqName,
-        string topicOrQueueName)
+        string topicOrQueueName,
+        Func<ServiceBusClientOptions>? serviceBusClientOptionsFactory = default,
+        Func<TokenCredential>? tokenCredentialFactory = default,
+        Action<T, ServiceBusMessage>? messageInterceptor = default,
+        Func<T, ServiceBusMessage>? messageFactory = default)
     {
         configuration.Services.AddScoped<IInfrastructurePublisher<T>, AzureServiceBusInfrastructurePublisher<T>>(
             sp =>
             {
                 var options = sp.GetRequiredService<IOptions<AzureServiceBusOptions>>().Value.Connections[mqName];
-                return new AzureServiceBusInfrastructurePublisher<T>(options, topicOrQueueName);
+                return new AzureServiceBusInfrastructurePublisher<T>(
+                    options,
+                    topicOrQueueName,
+                    serviceBusClientOptionsFactory ?? (() => new ServiceBusClientOptions
+                    {
+                        TransportType = ServiceBusTransportType.AmqpWebSockets
+                    }),
+                    tokenCredentialFactory ?? (() => new DefaultAzureCredential()),
+                    messageInterceptor ?? ((_, _) => { }),
+                    messageFactory ?? (arg => new ServiceBusMessage(JsonSerializer.Serialize(arg))));
             });
     }
 
-    public static void AddAzureServiceBusTopicReceiver<T, TMessageHandler>(this ReceiverConfiguration configuration,
+    public static ReceiverConfiguration<T> AddAzureServiceBusTopicReceiver<T>(this ReceiverConfiguration configuration,
         string mqName,
         string topicName,
         string subscriptionName)
-        where TMessageHandler : class, IAzureServiceBusMessageHandler<T>
     {
-        configuration.Services.AddScoped<IAzureServiceBusMessageHandler<T>, TMessageHandler>();
+        configuration.Services.AddScoped<IAzureServiceBusMessageHandler<T>, LoggerAzureServiceBusMessageHandler<T>>();
         configuration.Services.AddScoped<IInfrastructureReceiver, AzureServiceBusTopicInfrastructureReceiver<T>>(sp =>
         {
             var options = sp.GetRequiredService<IOptions<AzureServiceBusOptions>>().Value.Connections[mqName];
-            return new AzureServiceBusTopicInfrastructureReceiver<T>(options, sp.GetRequiredService<TMessageHandler>(),
+            return new AzureServiceBusTopicInfrastructureReceiver<T>(options,
+                sp.GetRequiredService<IAzureServiceBusMessageHandler<T>>(),
                 topicName, subscriptionName);
         });
+        return new ReceiverConfiguration<T>(configuration.Services);
     }
 
-    public static void AddAzureServiceBusQueueReceiver<T, TMessageHandler>(this ReceiverConfiguration configuration,
+    public static ReceiverConfiguration<T> AddAzureServiceBusQueueReceiver<T>(this ReceiverConfiguration configuration,
         string mqName,
         string queueName)
-        where TMessageHandler : class, IAzureServiceBusMessageHandler<T>
     {
-        configuration.Services.AddScoped<IAzureServiceBusMessageHandler<T>, TMessageHandler>();
+        configuration.Services.AddScoped<IAzureServiceBusMessageHandler<T>, LoggerAzureServiceBusMessageHandler<T>>();
         configuration.Services.AddScoped<IInfrastructureReceiver, AzureServiceBusQueueInfrastructureReceiver<T>>(sp =>
         {
             var options = sp.GetRequiredService<IOptions<AzureServiceBusOptions>>().Value.Connections[mqName];
-            return new AzureServiceBusQueueInfrastructureReceiver<T>(options, sp.GetRequiredService<TMessageHandler>(),
+            return new AzureServiceBusQueueInfrastructureReceiver<T>(options,
+                sp.GetRequiredService<IAzureServiceBusMessageHandler<T>>(),
                 queueName);
         });
+        return new ReceiverConfiguration<T>(configuration.Services);
     }
 }
