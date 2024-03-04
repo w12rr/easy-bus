@@ -16,4 +16,11 @@ public sealed class Publisher : IPublisher
         var definition = _eventPublishingDefinitions.OfType<IInfrastructurePublisher<T>>().Single();
         await definition.Publish(@event, cancellationToken);
     }
+    
+    public async Task Publish(object @event, CancellationToken cancellationToken)
+    {
+        var targetPublisherType = typeof(IInfrastructurePublisher<>).MakeGenericType(@event.GetType());
+        var definition = _eventPublishingDefinitions.Single(x => targetPublisherType.IsInstanceOfType(x));
+        await definition.Publish(@event, cancellationToken);
+    }
 }

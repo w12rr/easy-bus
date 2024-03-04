@@ -22,4 +22,9 @@ public class ChannelPublisher<T> : IInfrastructurePublisher<T>
 
         await channel.Writer.WriteAsync(@event, cancellationToken);
     }
+
+    public async Task Publish(object @event, CancellationToken cancellationToken)
+    {
+        await Publish((T)@event, cancellationToken);
+    }
 }

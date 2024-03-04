@@ -42,4 +42,9 @@ public class AzureServiceBusInfrastructurePublisher<T> : IInfrastructurePublishe
 
         await sender.SendMessageAsync(message, cancellationToken);
     }
+
+    public async Task Publish(object @event, CancellationToken cancellationToken)
+    {
+        await Publish((T)@event, cancellationToken);
+    }
 }

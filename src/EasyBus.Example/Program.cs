@@ -4,6 +4,7 @@ using EasyBus.AzureServiceBus.Receiving;
 using EasyBus.Core.Publishing;
 using EasyBus.Infrastructure.DependencyInjection;
 using EasyBus.InMemory.DependencyInjection;
+using EasyBus.Outbox;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -23,13 +24,17 @@ services.AddMessageQueue(config =>
         pub.AddAzureServiceBusEventPublisher<SomeEvent>(
             "Asd",
             "my-topic",
-            messageInterceptor: (@event, message) => { message.CorrelationId = @event.ToString(); });
+            messageInterceptor: (@event, message) =>
+            {
+                message.CorrelationId = @event.ToString();
+                message.PartitionKey = @event.ToString();
+            });
 
         //IF LOCAL
         pub.AddInMemoryEventPublisher<SomeEvent>();
 
-        // pub.AddOutboxStore<AppDbContext>();
-        // pub.AddOutboxMessageProducer<AppDbContext>();
+        pub.AddOutboxPublisher(configuration.GetConnectionString("Default")!);
+        pub.AddOutboxMessagesProcessor(configuration.GetConnectionString("Default")!);
     });
 
     config.AddReceiver(rec =>
@@ -49,9 +54,10 @@ services.AddMessageQueue(config =>
 
 await using var sp = services.BuildServiceProvider();
 var publisher = sp.GetRequiredService<IPublisher>();
+var outboxPublisher = sp.GetRequiredService<IOutboxPublisher>();
 
 await publisher.Publish(new SomeEvent(), CancellationToken.None);
-
+await outboxPublisher.Publish(new SomeEvent(), CancellationToken.None);
 
 static Task<bool> HandleAnyMessage<T>(IServiceProvider sp, T @event)
 {

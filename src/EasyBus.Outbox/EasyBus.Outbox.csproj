@@ -8,6 +8,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\EasyBus.Core\EasyBus.Core.csproj" />
+      <ProjectReference Include="..\EasyBus.Infrastructure\EasyBus.Infrastructure.csproj" />
     </ItemGroup>
 
     <ItemGroup>
