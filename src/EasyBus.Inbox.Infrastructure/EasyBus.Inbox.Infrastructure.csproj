@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\EasyBus.Inbox.Core\EasyBus.Inbox.Core.csproj" />
+      <ProjectReference Include="..\EasyBus.Infrastructure\EasyBus.Infrastructure.csproj" />
+    </ItemGroup>
+
+</Project>

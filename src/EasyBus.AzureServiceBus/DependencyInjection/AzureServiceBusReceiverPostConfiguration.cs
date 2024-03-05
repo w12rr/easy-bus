@@ -7,18 +7,18 @@ namespace EasyBus.AzureServiceBus.DependencyInjection;
 
 public class AzureServiceBusReceiverPostConfiguration<T>
 {
-    private readonly IServiceCollection _services;
+    public IServiceCollection Services;
 
     public AzureServiceBusReceiverPostConfiguration(IServiceCollection services)
     {
-        _services = services;
+        Services = services;
     }
 
     public AzureServiceBusReceiverPostConfiguration<T> SetFuncHandler(
         Func<IServiceProvider, ProcessMessageEventArgs, T, Task> onSuccess,
         Func<IServiceProvider, ProcessErrorEventArgs, Task>? onError = default)
     {
-        _services.AddScoped<IAzureServiceBusMessageHandler<T>>(sp =>
+        Services.AddScoped<IAzureServiceBusMessageHandler<T>>(sp =>
         {
             return new FuncAzureServiceBusMessageHandler<T>(
                 sp.GetRequiredService<ILogger<FuncAzureServiceBusMessageHandler<T>>>(),
@@ -31,7 +31,7 @@ public class AzureServiceBusReceiverPostConfiguration<T>
     public AzureServiceBusReceiverPostConfiguration<T> SetHandler<THandler>()
         where THandler : class, IAzureServiceBusMessageHandler<T>
     {
-        _services.AddScoped<IAzureServiceBusMessageHandler<T>, THandler>();
+        Services.AddScoped<IAzureServiceBusMessageHandler<T>, THandler>();
         return this;
     }
 

@@ -18,6 +18,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyBus.InMemory", "src\Eas
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyBus.Outbox", "src\EasyBus.Outbox\EasyBus.Outbox.csproj", "{BA0949D2-7690-420B-A5DE-531E519E77A9}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Inbox", "Inbox", "{9F44C232-2017-4CA3-9E11-E33B454E00B4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyBus.Inbox.AzureServiceBus", "src\EasyBus.Inbox.AzureServiceBus\EasyBus.Inbox.AzureServiceBus.csproj", "{297F1C3B-6644-4C6E-937F-622DA74E85AB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyBus.Inbox.Core", "src\EasyBus.Inbox.Core\EasyBus.Inbox.Core.csproj", "{2332A3FE-8393-44C4-8DEF-C96EBA6A145F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyBus.Inbox.Infrastructure", "src\EasyBus.Inbox.Infrastructure\EasyBus.Inbox.Infrastructure.csproj", "{2B1C2B35-381E-40C2-9263-C441BE7EC760}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,7 +56,22 @@ Global
 		{BA0949D2-7690-420B-A5DE-531E519E77A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BA0949D2-7690-420B-A5DE-531E519E77A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BA0949D2-7690-420B-A5DE-531E519E77A9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{297F1C3B-6644-4C6E-937F-622DA74E85AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{297F1C3B-6644-4C6E-937F-622DA74E85AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{297F1C3B-6644-4C6E-937F-622DA74E85AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{297F1C3B-6644-4C6E-937F-622DA74E85AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2332A3FE-8393-44C4-8DEF-C96EBA6A145F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2332A3FE-8393-44C4-8DEF-C96EBA6A145F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2332A3FE-8393-44C4-8DEF-C96EBA6A145F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2332A3FE-8393-44C4-8DEF-C96EBA6A145F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2B1C2B35-381E-40C2-9263-C441BE7EC760}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B1C2B35-381E-40C2-9263-C441BE7EC760}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B1C2B35-381E-40C2-9263-C441BE7EC760}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B1C2B35-381E-40C2-9263-C441BE7EC760}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{297F1C3B-6644-4C6E-937F-622DA74E85AB} = {9F44C232-2017-4CA3-9E11-E33B454E00B4}
+		{2332A3FE-8393-44C4-8DEF-C96EBA6A145F} = {9F44C232-2017-4CA3-9E11-E33B454E00B4}
+		{2B1C2B35-381E-40C2-9263-C441BE7EC760} = {9F44C232-2017-4CA3-9E11-E33B454E00B4}
 	EndGlobalSection
 EndGlobal

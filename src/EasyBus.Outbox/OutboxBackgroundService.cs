@@ -96,23 +96,22 @@ public class OutboxBackgroundService : BackgroundService
         await cmd.ExecuteNonQueryAsync(cancellationToken);
     }
 
-    private static async Task<(Guid id, string type, string data, int tryCount)[]> GetNext(SqlConnection sqlConnection,
+    private static async Task<(Guid id, string type, string data)[]> GetNext(SqlConnection sqlConnection,
         SqlTransaction transaction, CancellationToken cancellationToken)
     {
-        await using var cmd = new SqlCommand("SELECT Id, Type, Data, PublishTryCount  FROM [dbo].Outboxes",
+        await using var cmd = new SqlCommand("SELECT Id, Type, Data FROM [dbo].Outboxes",
             sqlConnection, transaction);
 
         await using var reader = await cmd.ExecuteReaderAsync(cancellationToken);
 
-        var data = new List<(Guid id, string type, string data, int tryCount)>();
+        var data = new List<(Guid id, string type, string data)>();
 
         while (await reader.ReadAsync(cancellationToken))
         {
             data.Add((
                 reader.GetGuid(0),
                 reader.GetString(1),
-                reader.GetString(2),
-                reader.GetInt32(3)
+                reader.GetString(2)
             ));
         }
 

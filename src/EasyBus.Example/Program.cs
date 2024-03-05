@@ -2,6 +2,9 @@
 using EasyBus.AzureServiceBus.DependencyInjection;
 using EasyBus.AzureServiceBus.Receiving;
 using EasyBus.Core.Publishing;
+using EasyBus.Inbox.AzureServiceBus;
+using EasyBus.Inbox.Core;
+using EasyBus.Inbox.Infrastructure;
 using EasyBus.Infrastructure.DependencyInjection;
 using EasyBus.InMemory.DependencyInjection;
 using EasyBus.Outbox;
@@ -39,16 +42,24 @@ services.AddMessageQueue(config =>
 
     config.AddReceiver(rec =>
     {
+        rec.AddInboxMessageConsumer();
+        
         //IF PROD
         rec.AddAzureServiceBusTopicReceiver<SomeEvent>("Asd", "topic", "subscription")
-            .SetFuncHandler(HandleAnyMessage);
+            .SetFuncHandler(HandleAnyMessage)
+            .SetInbox()
+            .SetInboxFuncHandler((sp, mess, ct) =>
+            {
+                sp.GetRequiredService<ILogger>().LogInformation("Got {@Message}", mess);
+                return Task.FromResult(InboxMessageAction.Delete);
+            });
         rec.AddAzureServiceBusQueueReceiver<SomeEvent>("Asd", "queue")
             .SetFuncHandler(HandleAnyMessage)
             .SetHandler<SomeEventReceiver>();
 
         //IF LOCAL
         rec.AddInMemoryReceiver<SomeEvent>()
-            .AddFuncHandler(HandleAnyMessage);
+            .SetFuncHandler(HandleAnyMessage);
     });
 });
 

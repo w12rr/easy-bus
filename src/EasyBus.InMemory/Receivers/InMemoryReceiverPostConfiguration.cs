@@ -2,7 +2,7 @@
 
 namespace EasyBus.InMemory.Receivers;
 
-public class InMemoryReceiverPostConfiguration<T>
+public class InMemoryReceiverPostConfiguration<T> 
 {
     private readonly IServiceCollection _services;
 
@@ -11,7 +11,7 @@ public class InMemoryReceiverPostConfiguration<T>
         _services = services;
     }
     
-    public InMemoryReceiverPostConfiguration<T> AddFuncHandler(Func<IServiceProvider, T, Task> onSuccess)
+    public InMemoryReceiverPostConfiguration<T> SetFuncHandler(Func<IServiceProvider, T, Task> onSuccess)
     {
         _services.AddScoped<IInMemoryMessageHandler<T>>(
             sp => new FuncInMemoryMessageHandler<T>(
