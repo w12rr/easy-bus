@@ -24,10 +24,10 @@ public class InboxConsumerBackgroundService : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         await Task.Yield();
-        //todo create table
+        await RunProcessing(stoppingToken);
     }
 
-    public async Task RunProcessing(CancellationToken cancellationToken)
+    private async Task RunProcessing(CancellationToken cancellationToken)
     {
         while (!cancellationToken.IsCancellationRequested)
         {
@@ -85,9 +85,19 @@ public class InboxConsumerBackgroundService : BackgroundService
         }
     }
 
-    public static async Task UpdatePickupDa te(InboxEntity entity, SqlConnection sqlConnection, //todo
+    public static async Task UpdatePickupDate(InboxEntity entity, SqlConnection sqlConnection,
         SqlTransaction transaction, CancellationToken cancellationToken)
     {
+        await using var cmd = new SqlCommand(
+            "UPDATE [dbo].[Inboxes] SET TriesCount = @TriesCount, PickupDate = @PickupDate WHERE Id = @Id",
+            sqlConnection,
+            transaction);
+        cmd.Parameters.AddWithValue("@TriesCount", entity.TriesCount + 1);
+        cmd.Parameters.AddWithValue("@Id", entity.Id);
+        cmd.Parameters.AddWithValue("@PickupDate", entity.InsertDate.AddSeconds(Math.Pow(2, entity.TriesCount)));
+
+        await cmd.ExecuteNonQueryAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
     }
 
     public static async Task SetReceived(Guid id, SqlConnection sqlConnection, SqlTransaction transaction,
@@ -127,5 +137,3 @@ public class InboxConsumerBackgroundService : BackgroundService
         return data.ToArray();
     }
 }
-
-public sealed record InboxEntity(Guid Id, string Type, string Data, int TriesCount, DateTime InsertDate);

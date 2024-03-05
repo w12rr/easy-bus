@@ -8,5 +8,6 @@ public static class InboxDependencyInjectionExtensions
     public static void AddInboxMessageConsumer(this ReceiverConfiguration receiver)
     {
         receiver.Services.AddHostedService<InboxConsumerBackgroundService>();
+        receiver.Services.AddHostedService<InboxOldMessagesDeleterBackgroundService>();
     }
 }
