@@ -1,4 +1,5 @@
-﻿using EasyBus.Infrastructure.DependencyInjection;
+﻿using EasyBus.Inbox.Core;
+using EasyBus.Infrastructure.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyBus.Inbox.Infrastructure;
@@ -9,5 +10,6 @@ public static class InboxDependencyInjectionExtensions
     {
         receiver.Services.AddHostedService<InboxConsumerBackgroundService>();
         receiver.Services.AddHostedService<InboxOldMessagesDeleterBackgroundService>();
+        receiver.Services.AddScoped<IInboxRepository, InboxRepository>();
     }
 }
