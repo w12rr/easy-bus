@@ -4,16 +4,16 @@ namespace EasyBus.InMemory.Receivers;
 
 public class InMemoryReceiverPostConfiguration<T> 
 {
-    private readonly IServiceCollection _services;
+    public readonly IServiceCollection Services;
 
     public InMemoryReceiverPostConfiguration(IServiceCollection services)
     {
-        _services = services;
+        Services = services;
     }
     
     public InMemoryReceiverPostConfiguration<T> SetFuncHandler(Func<IServiceProvider, T, Task> onSuccess)
     {
-        _services.AddScoped<IInMemoryMessageHandler<T>>(
+        Services.AddScoped<IInMemoryMessageHandler<T>>(
             sp => new FuncInMemoryMessageHandler<T>(
                 async @event => await onSuccess(sp, @event)));
         return this;
