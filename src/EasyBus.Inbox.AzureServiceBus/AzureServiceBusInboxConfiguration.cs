@@ -14,7 +14,7 @@ public class AzureServiceBusInboxConfiguration<T> : IInboxConfiguration<AzureSer
     }
 
     public AzureServiceBusReceiverPostConfiguration<T> SetInboxFuncHandler(
-        Func<IServiceProvider, T, CancellationToken, Task<InboxMessageAction>> handler)
+        Func<IServiceProvider, T, CancellationToken, Task<InboxMessageState>> handler)
     {
         _conf.Services.AddScoped<IInboxMessageReceiver<T>>(
             sp => new FuncInboxMessageReceiver<T>(

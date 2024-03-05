@@ -51,7 +51,7 @@ services.AddMessageQueue(config =>
             .SetInboxFuncHandler((sp, mess, ct) =>
             {
                 sp.GetRequiredService<ILogger>().LogInformation("Got {@Message}", mess);
-                return Task.FromResult(InboxMessageAction.Delete);
+                return Task.FromResult(InboxMessageState.NotReceived);
             });
         rec.AddAzureServiceBusQueueReceiver<SomeEvent>("Asd", "queue")
             .SetFuncHandler(HandleAnyMessage)

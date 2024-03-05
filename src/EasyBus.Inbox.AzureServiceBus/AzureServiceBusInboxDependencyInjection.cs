@@ -12,7 +12,7 @@ public static class AzureServiceBusInboxDependencyInjection
         this AzureServiceBusReceiverPostConfiguration<T> conf)
     {
         conf.SetFuncHandler(
-            async (sp, @event) => await sp.GetRequiredService<IInboxMessageHandler<T>>()
+            async (sp, @event) => await sp.GetRequiredService<IInboxMessageIntoDbWriter<T>>()
                 .WriteIntoDb(@event, CancellationToken.None));
         return new AzureServiceBusInboxConfiguration<T>(conf);
     }

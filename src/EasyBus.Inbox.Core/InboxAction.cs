@@ -1,7 +1,7 @@
 ﻿namespace EasyBus.Inbox.Core;
 
-public enum InboxMessageAction
+public enum InboxMessageState
 {
-    Retry,
-    Delete
+    Received,
+    NotReceived
 }

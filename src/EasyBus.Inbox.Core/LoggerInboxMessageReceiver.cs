@@ -11,9 +11,14 @@ public class LoggerInboxMessageReceiver<T> : IInboxMessageReceiver<T>
         _logger = logger;
     }
 
-    public Task<InboxMessageAction> Receive(T @event, CancellationToken cancellationToken)
+    public Task<InboxMessageState> Receive(T @event, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Receiving event {@Event}", @event);
-        return Task.FromResult(InboxMessageAction.Delete);
+        return Task.FromResult(InboxMessageState.NotReceived);
+    }
+
+    public async Task<InboxMessageState> Receive(object @event, CancellationToken cancellationToken)
+    {
+        return await Receive((T)@event, cancellationToken);
     }
 }
