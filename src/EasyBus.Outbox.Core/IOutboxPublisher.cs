@@ -1,6 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 
-namespace EasyBus.Outbox;
+namespace EasyBus.Outbox.Core;
 
 public interface IOutboxPublisher
 {

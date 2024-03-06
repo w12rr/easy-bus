@@ -11,7 +11,8 @@
       <ProjectReference Include="..\EasyBus.AzureServiceBus\EasyBus.AzureServiceBus.csproj" />
       <ProjectReference Include="..\EasyBus.Inbox.AzureServiceBus\EasyBus.Inbox.AzureServiceBus.csproj" />
       <ProjectReference Include="..\EasyBus.InMemory\EasyBus.InMemory.csproj" />
-      <ProjectReference Include="..\EasyBus.Outbox\EasyBus.Outbox.csproj" />
+      <ProjectReference Include="..\EasyBus.Outbox.Core\EasyBus.Outbox.Core.csproj" />
+      <ProjectReference Include="..\EasyBux.Outbox.Infrastructure\EasyBux.Outbox.Infrastructure.csproj" />
     </ItemGroup>
 
     <ItemGroup>

@@ -38,7 +38,7 @@ public class InboxRepository : IInboxRepository, IAsyncDisposable
 
     public async Task DeleteOldReceivedMessages(TimeSpan olderThan, CancellationToken cancellationToken)
     {
-        var transaction = StartConnectionIfNotStarted();
+        var transaction = await StartConnectionIfNotStarted(cancellationToken);
         await using var cmd = new SqlCommand(SqlServerQueries.DeleteOldProcessed, transaction.Connection, transaction);
         cmd.Parameters.AddWithValue("@Date", DateTime.Now.Add(olderThan.Negate()));
         await cmd.ExecuteNonQueryAsync(cancellationToken);
@@ -46,7 +46,7 @@ public class InboxRepository : IInboxRepository, IAsyncDisposable
 
     public async Task<IReadOnlyCollection<InboxEntity>> GetUnprocessedMessages(CancellationToken cancellationToken)
     {
-        var transaction = StartConnectionIfNotStarted();
+        var transaction = await StartConnectionIfNotStarted(cancellationToken);
         await using var cmd = new SqlCommand(SqlServerQueries.GetUnprocessed, transaction.Connection, transaction);
         await using var reader = await cmd.ExecuteReaderAsync(cancellationToken);
         var result = new List<InboxEntity>();
@@ -66,7 +66,7 @@ public class InboxRepository : IInboxRepository, IAsyncDisposable
 
     public async Task SetProcessed(Guid id, CancellationToken cancellationToken)
     {
-        var transaction = StartConnectionIfNotStarted();
+        var transaction = await StartConnectionIfNotStarted(cancellationToken);
         await using var cmd = new SqlCommand(SqlServerQueries.SetReceived, transaction.Connection, transaction);
         cmd.Parameters.AddWithValue("@Id", id);
         await cmd.ExecuteNonQueryAsync(cancellationToken);
@@ -75,7 +75,7 @@ public class InboxRepository : IInboxRepository, IAsyncDisposable
     public async Task UpdateTries(int nextTriesCount, DateTime nextPickupDate, Guid id,
         CancellationToken cancellationToken)
     {
-        var transaction = StartConnectionIfNotStarted();
+        var transaction = await StartConnectionIfNotStarted(cancellationToken);
         await using var cmd = new SqlCommand(SqlServerQueries.UpdateTries, transaction.Connection, transaction);
         cmd.Parameters.AddWithValue("@Id", id);
         cmd.Parameters.AddWithValue("@TriesCount", nextTriesCount);
@@ -85,7 +85,7 @@ public class InboxRepository : IInboxRepository, IAsyncDisposable
 
     public async Task Insert(string messageId, string type, string data, CancellationToken cancellationToken)
     {
-        var transaction = StartConnectionIfNotStarted();
+        var transaction = await StartConnectionIfNotStarted(cancellationToken);
         await using var cmd = new SqlCommand(SqlServerQueries.Insert, transaction.Connection, transaction);
         cmd.Parameters.AddWithValue("@MessageId", messageId);
         cmd.Parameters.AddWithValue("@Type", type);
@@ -98,12 +98,13 @@ public class InboxRepository : IInboxRepository, IAsyncDisposable
         await _transaction.AssertNull().CommitAsync(cancellationToken);
     }
 
-    private SqlTransaction StartConnectionIfNotStarted()
+    private async Task<SqlTransaction> StartConnectionIfNotStarted(CancellationToken cancellationToken)
     {
         if (_transaction is not null) return _transaction;
 
         _connection = new SqlConnection(_connectionString);
         _transaction = _connection.BeginTransaction();
+        await _connection.OpenAsync(cancellationToken);
 
         return _transaction;
     }

@@ -1,4 +1,4 @@
-﻿namespace EasyBus.Outbox;
+﻿namespace EasyBus.Outbox.Core;
 
 public sealed record OutboxEntity
 {

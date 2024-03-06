@@ -2,12 +2,14 @@
 using EasyBus.AzureServiceBus.DependencyInjection;
 using EasyBus.AzureServiceBus.Receiving;
 using EasyBus.Core.Publishing;
+using EasyBus.Example;
 using EasyBus.Inbox.AzureServiceBus;
 using EasyBus.Inbox.Core;
 using EasyBus.Inbox.Infrastructure;
 using EasyBus.Infrastructure.DependencyInjection;
 using EasyBus.InMemory.DependencyInjection;
-using EasyBus.Outbox;
+using EasyBus.Outbox.Core;
+using EasyBux.Outbox.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -36,8 +38,8 @@ services.AddMessageQueue(config =>
         //IF LOCAL
         pub.AddInMemoryEventPublisher<SomeEvent>();
 
-        pub.AddOutboxPublisher(configuration.GetConnectionString("Default")!);
-        pub.AddOutboxMessagesProcessor(configuration.GetConnectionString("Default")!);
+        pub.AddOutboxPublisher();
+        pub.AddOutboxMessagesProcessor();
     });
 
     config.AddReceiver(rec =>
@@ -76,18 +78,20 @@ static Task<bool> HandleAnyMessage<T>(IServiceProvider sp, T @event)
     return Task.FromResult(true);
 }
 
-
-public sealed record SomeEvent;
-
-public sealed class SomeEventReceiver : IAzureServiceBusMessageHandler<SomeEvent>
+namespace EasyBus.Example
 {
-    public Task MessageHandler(ProcessMessageEventArgs args, SomeEvent @event)
-    {
-        throw new NotImplementedException();
-    }
+    public sealed record SomeEvent;
 
-    public Task ErrorHandler(ProcessErrorEventArgs args)
+    public sealed class SomeEventReceiver : IAzureServiceBusMessageHandler<SomeEvent>
     {
-        throw new NotImplementedException();
+        public Task MessageHandler(ProcessMessageEventArgs args, SomeEvent @event)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task ErrorHandler(ProcessErrorEventArgs args)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
