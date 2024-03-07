@@ -18,6 +18,49 @@ public static class SqlServerQueries
         "SELECT Id, Type, Data, TriesCount FROM [dbo].[Inboxes] WHERE Received = 0 AND PickupDate <= GETDATE() AND TriesCount < 11";
 
     public const string DeleteOldProcessed = "DELETE FROM [dbo].[Inboxes] WHERE Received = 1 AND InsertDate < @Date";
+
+    public const string CreateTable =
+        """
+            IF (NOT EXISTS (SELECT *
+                    FROM INFORMATION_SCHEMA.TABLES
+                    WHERE TABLE_SCHEMA = 'dbo'
+                    AND  TABLE_NAME = 'Inboxes'))
+            BEGIN
+                SET ANSI_NULLS ON
+                GO
+                
+                SET QUOTED_IDENTIFIER ON
+                GO
+                
+                CREATE TABLE [dbo].[Inboxes](
+        	        [Id] [uniqueidentifier] NOT NULL,
+        	        [MessageId] [nvarchar](450) NOT NULL,
+        	        [Type] [nvarchar](max) NOT NULL,
+        	        [Data] [nvarchar](max) NOT NULL,
+        	        [Received] [bit] NOT NULL,
+        	        [TriesCount] [int] NOT NULL,
+        	        [PickupDate] [datetime2](7) NOT NULL,
+        	        [InsertDate] [datetime2](7) NOT NULL,
+                 CONSTRAINT [PK_Inboxes] PRIMARY KEY CLUSTERED 
+                (
+        	        [Id] ASC
+                )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+                ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+                GO
+                
+                ALTER TABLE [dbo].[Inboxes] ADD  DEFAULT ((0)) FOR [Received]
+                GO
+                
+                ALTER TABLE [dbo].[Inboxes] ADD  DEFAULT ((0)) FOR [TriesCount]
+                GO
+                
+                ALTER TABLE [dbo].[Inboxes] ADD  DEFAULT (getdate()) FOR [PickupDate]
+                GO
+                
+                ALTER TABLE [dbo].[Inboxes] ADD  DEFAULT (getdate()) FOR [InsertDate]
+                GO
+            END
+        """;
 }
 
 public class InboxRepository : IInboxRepository, IAsyncDisposable
@@ -31,9 +74,11 @@ public class InboxRepository : IInboxRepository, IAsyncDisposable
         _connectionString = connectionString;
     }
 
-    public Task CreateTable(CancellationToken cancellationToken)
+    public async Task CreateTable(CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var transaction = await StartConnectionIfNotStarted(cancellationToken);
+        await using var cmd = new SqlCommand(SqlServerQueries.CreateTable, transaction.Connection, transaction);
+        await cmd.ExecuteNonQueryAsync(cancellationToken);
     }
 
     public async Task DeleteOldReceivedMessages(TimeSpan olderThan, CancellationToken cancellationToken)

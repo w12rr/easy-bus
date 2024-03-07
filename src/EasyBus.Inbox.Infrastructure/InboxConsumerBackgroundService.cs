@@ -6,15 +6,19 @@ namespace EasyBus.Inbox.Infrastructure;
 public class InboxConsumerBackgroundService : BackgroundService
 {
     private readonly IConsumingRunner _consumingRunner;
+    private readonly IMissingOutboxTableCreator _missingOutboxTableCreator;
 
-    public InboxConsumerBackgroundService(IConsumingRunner consumingRunner)
+    public InboxConsumerBackgroundService(IConsumingRunner consumingRunner,
+        IMissingOutboxTableCreator missingOutboxTableCreator)
     {
         _consumingRunner = consumingRunner;
+        _missingOutboxTableCreator = missingOutboxTableCreator;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         await Task.Yield();
+        await _missingOutboxTableCreator.Create(stoppingToken);
         await RunProcessing(stoppingToken);
     }
 
