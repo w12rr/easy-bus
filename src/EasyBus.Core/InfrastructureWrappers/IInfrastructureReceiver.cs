@@ -1,6 +1,6 @@
 namespace EasyBus.Core.InfrastructureWrappers;
 
-public interface IInfrastructureReceiver : IAsyncDisposable
+public interface IInfrastructureReceiver 
 {
     Task StartReceiving(CancellationToken cancellationToken);
 }

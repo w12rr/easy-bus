@@ -7,7 +7,7 @@ using EasyBus.Core.InfrastructureWrappers;
 
 namespace EasyBus.AzureServiceBus.Receiving;
 
-public class AzureServiceBusTopicInfrastructureReceiver<T> : IInfrastructureReceiver
+public class AzureServiceBusTopicInfrastructureReceiver<T> : IInfrastructureReceiver, IAsyncDisposable
 {
     private readonly ServiceBusConnectionOptions _serviceBusConnectionOptions;
     private readonly IAzureServiceBusMessageHandler<T> _messageHandler;
