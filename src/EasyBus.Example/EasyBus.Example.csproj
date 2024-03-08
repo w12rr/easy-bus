@@ -8,9 +8,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\EasyBus.AzureServiceBus\EasyBus.AzureServiceBus.csproj" />
-      <ProjectReference Include="..\EasyBus.Inbox.AzureServiceBus\EasyBus.Inbox.AzureServiceBus.csproj" />
-      <ProjectReference Include="..\EasyBus.InMemory\EasyBus.InMemory.csproj" />
+      <ProjectReference Include="..\EasyBus.Transports.AzureServiceBus\EasyBus.Transports.AzureServiceBus.csproj" />
+      <ProjectReference Include="..\EasyBus.Inbox.Transports.AzureServiceBus\EasyBus.Inbox.Transports.AzureServiceBus.csproj" />
+      <ProjectReference Include="..\EasyBus.Transports.InMemory\EasyBus.Transports.InMemory.csproj" />
       <ProjectReference Include="..\EasyBus.Outbox.Core\EasyBus.Outbox.Core.csproj" />
       <ProjectReference Include="..\EasyBux.Outbox.Infrastructure\EasyBux.Outbox.Infrastructure.csproj" />
     </ItemGroup>

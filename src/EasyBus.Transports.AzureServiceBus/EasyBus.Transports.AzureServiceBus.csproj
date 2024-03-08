@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AssemblyName>EasyBus.Transports.AzureServiceBus</AssemblyName>
+        <RootNamespace>EasyBus.Transports.AzureServiceBus</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\EasyBus.Infrastructure\EasyBus.Infrastructure.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Azure.Identity" Version="1.10.4" />
+      <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.17.0" />
+    </ItemGroup>
+
+</Project>

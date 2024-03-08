@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AssemblyName>EasyBus.Transports.InMemory</AssemblyName>
+        <RootNamespace>EasyBus.Transports.InMemory</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\EasyBus.Core\EasyBus.Core.csproj" />
+      <ProjectReference Include="..\EasyBus.Infrastructure\EasyBus.Infrastructure.csproj" />
+    </ItemGroup>
+
+</Project>

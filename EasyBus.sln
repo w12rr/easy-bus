@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyBus.AzureServiceBus", "src\EasyBus.AzureServiceBus\EasyBus.AzureServiceBus.csproj", "{433E68C5-2F5A-40E0-B052-54CD200B7E99}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyBus.Transports.AzureServiceBus", "src\EasyBus.Transports.AzureServiceBus\EasyBus.Transports.AzureServiceBus.csproj", "{433E68C5-2F5A-40E0-B052-54CD200B7E99}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyBus.Core", "src\EasyBus.Core\EasyBus.Core.csproj", "{CABF00B7-72B7-431A-84EA-02EB25F42837}"
 EndProject
@@ -14,19 +14,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Items", "Items", "{CA3CD903
 		readme.md = readme.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyBus.InMemory", "src\EasyBus.InMemory\EasyBus.InMemory.csproj", "{D93465EB-CAF5-4C9B-97F4-9E357A08DB83}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyBus.Transports.InMemory", "src\EasyBus.Transports.InMemory\EasyBus.Transports.InMemory.csproj", "{D93465EB-CAF5-4C9B-97F4-9E357A08DB83}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyBus.Outbox.Core", "src\EasyBus.Outbox.Core\EasyBus.Outbox.Core.csproj", "{BA0949D2-7690-420B-A5DE-531E519E77A9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Inbox", "Inbox", "{9F44C232-2017-4CA3-9E11-E33B454E00B4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyBus.Inbox.AzureServiceBus", "src\EasyBus.Inbox.AzureServiceBus\EasyBus.Inbox.AzureServiceBus.csproj", "{297F1C3B-6644-4C6E-937F-622DA74E85AB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyBus.Inbox.Transports.AzureServiceBus", "src\EasyBus.Inbox.Transports.AzureServiceBus\EasyBus.Inbox.Transports.AzureServiceBus.csproj", "{297F1C3B-6644-4C6E-937F-622DA74E85AB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyBus.Inbox.Core", "src\EasyBus.Inbox.Core\EasyBus.Inbox.Core.csproj", "{2332A3FE-8393-44C4-8DEF-C96EBA6A145F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyBus.Inbox.Infrastructure", "src\EasyBus.Inbox.Infrastructure\EasyBus.Inbox.Infrastructure.csproj", "{2B1C2B35-381E-40C2-9263-C441BE7EC760}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyBus.Inbox.InMemory", "src\EasyBus.Inbox.InMemory\EasyBus.Inbox.InMemory.csproj", "{88781330-08E2-4364-B851-F97D75818FB2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyBus.Inbox.Transports.InMemory", "src\EasyBus.Inbox.Transports.InMemory\EasyBus.Inbox.Transports.InMemory.csproj", "{88781330-08E2-4364-B851-F97D75818FB2}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Outbox", "Outbox", "{9B9C9DEC-3203-4E56-9A59-AD66A72D651B}"
 EndProject
@@ -38,7 +38,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Bin", "Bin", "{43B07478-671
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyBux.Outbox.Infrastructure", "src\EasyBux.Outbox.Infrastructure\EasyBux.Outbox.Infrastructure.csproj", "{F62067A8-5828-4728-97F4-DEFC389FC1EB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyBus.Kafka", "src\EasyBus.Kafka\EasyBus.Kafka.csproj", "{4FF4158F-F200-4DA5-80CD-2638771AD5C2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyBus.Transports.Kafka", "src\EasyBus.Transports.Kafka\EasyBus.Transports.Kafka.csproj", "{4FF4158F-F200-4DA5-80CD-2638771AD5C2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyBus.Example.Kafka", "src\EasyBus.Example.Kafka\EasyBus.Example.Kafka.csproj", "{6C42AD0C-8E61-4954-BAE6-FA5A93E254A7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -94,6 +96,10 @@ Global
 		{4FF4158F-F200-4DA5-80CD-2638771AD5C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4FF4158F-F200-4DA5-80CD-2638771AD5C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4FF4158F-F200-4DA5-80CD-2638771AD5C2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6C42AD0C-8E61-4954-BAE6-FA5A93E254A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C42AD0C-8E61-4954-BAE6-FA5A93E254A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C42AD0C-8E61-4954-BAE6-FA5A93E254A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C42AD0C-8E61-4954-BAE6-FA5A93E254A7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{2332A3FE-8393-44C4-8DEF-C96EBA6A145F} = {9F44C232-2017-4CA3-9E11-E33B454E00B4}
@@ -107,5 +113,6 @@ Global
 		{576612A7-A160-483A-9653-1542DBC8A8D1} = {43B07478-6718-4096-9CC9-97433CEA9B8E}
 		{F62067A8-5828-4728-97F4-DEFC389FC1EB} = {9B9C9DEC-3203-4E56-9A59-AD66A72D651B}
 		{4FF4158F-F200-4DA5-80CD-2638771AD5C2} = {A71CDE9D-C6D3-4B98-B6BE-45E27AD7B828}
+		{6C42AD0C-8E61-4954-BAE6-FA5A93E254A7} = {43B07478-6718-4096-9CC9-97433CEA9B8E}
 	EndGlobalSection
 EndGlobal
