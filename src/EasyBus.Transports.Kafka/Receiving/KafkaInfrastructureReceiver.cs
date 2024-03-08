@@ -40,11 +40,15 @@ public class KafkaInfrastructureReceiver<T> : IInfrastructureReceiver, IDisposab
 
         _subscriberTask = Task.Run(async () =>
         {
-            var message = _consumer.Consume();
-            var @event = JsonSerializer.Deserialize<T>(message.Message.Value).AssertNull();
-            await _messageHandler.Handle(message.AssertNull(), @event);
+            while (true)
+            {
+                var message = _consumer.Consume();
+                var @event = JsonSerializer.Deserialize<T>(message.Message.Value).AssertNull();
+                Console.WriteLine(_messageHandler.GetType().FullName);
+                await _messageHandler.Handle(message.AssertNull(), @event);
+            }
         }, cancellationToken);
-        
+
         return Task.CompletedTask;
     }
 

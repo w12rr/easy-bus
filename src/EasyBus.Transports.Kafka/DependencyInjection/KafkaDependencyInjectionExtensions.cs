@@ -27,7 +27,8 @@ public static class KafkaDependencyInjectionExtensions
         string mqName,
         string topic)
     {
-        configuration.Services.AddScoped<IInfrastructurePublisher<T>, KafkaInfrastructurePublisher<T>>(
+        //todo others registrations IInfrastructurePublisher instead IInfrastructurePublisher<T>
+        configuration.Services.AddScoped<IInfrastructurePublisher, KafkaInfrastructurePublisher<T>>(
             sp =>
             {
                 var options = sp.GetRequiredService<IOptions<KafkaOptions>>().Value.Connections[mqName];

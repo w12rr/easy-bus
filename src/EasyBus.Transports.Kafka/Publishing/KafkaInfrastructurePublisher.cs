@@ -28,7 +28,7 @@ public class KafkaInfrastructurePublisher<T> : IInfrastructurePublisher<T>
 
     private static Message<Null, string> CreateMessage(T @event) => new()
     {
-        Value = JsonSerializer.Serialize(JsonSerializer.Serialize(@event))
+        Value = JsonSerializer.Serialize(@event)
     };
 
     public async Task Publish(object @event, CancellationToken cancellationToken)

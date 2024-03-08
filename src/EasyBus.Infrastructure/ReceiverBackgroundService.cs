@@ -7,9 +7,9 @@ public class ReceiverBackgroundService : BackgroundService
 {
     private readonly IReadOnlyCollection<IInfrastructureReceiver> _receivers;
 
-    public ReceiverBackgroundService(IReadOnlyCollection<IInfrastructureReceiver> receivers)
+    public ReceiverBackgroundService(IEnumerable<IInfrastructureReceiver> receivers)
     {
-        _receivers = receivers;
+        _receivers = receivers.ToList().AsReadOnly();
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)

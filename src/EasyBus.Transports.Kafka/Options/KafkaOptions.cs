@@ -2,5 +2,5 @@
 
 public sealed class KafkaOptions
 {
-    public required IDictionary<string, KafkaConnectionOptions> Connections { get; init; }
+    public IDictionary<string, KafkaConnectionOptions> Connections { get; } = new Dictionary<string, KafkaConnectionOptions>();
 }

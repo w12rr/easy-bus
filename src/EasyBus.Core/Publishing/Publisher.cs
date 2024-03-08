@@ -6,9 +6,9 @@ public sealed class Publisher : IPublisher
 {
     private readonly IReadOnlyCollection<IInfrastructurePublisher> _eventPublishingDefinitions;
 
-    public Publisher(IReadOnlyCollection<IInfrastructurePublisher> eventPublishingDefinitions)
+    public Publisher(IEnumerable<IInfrastructurePublisher> eventPublishingDefinitions)
     {
-        _eventPublishingDefinitions = eventPublishingDefinitions;
+        _eventPublishingDefinitions = eventPublishingDefinitions.ToList().AsReadOnly();
     }
     
     public async Task Publish<T>(T @event, CancellationToken cancellationToken)
