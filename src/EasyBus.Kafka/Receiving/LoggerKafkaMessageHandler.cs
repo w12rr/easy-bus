@@ -1,7 +1,7 @@
 using Confluent.Kafka;
 using Microsoft.Extensions.Logging;
 
-namespace EasyBus.AzureServiceBus.Receiving;
+namespace EasyBus.Kafka.Receiving;
 
 public class LoggerKafkaMessageHandler<T> : IKafkaMessageHandler<T>
 {
@@ -14,6 +14,7 @@ public class LoggerKafkaMessageHandler<T> : IKafkaMessageHandler<T>
 
     public Task Handle(ConsumeResult<Ignore, string> message, T @event)
     {
-        throw new NotImplementedException();
+        _logger.LogInformation("Got message: {Topic} {@Event}", message.Topic, @event);
+        return Task.CompletedTask;
     }
 }

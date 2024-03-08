@@ -5,23 +5,23 @@ using EasyBus.Core.InfrastructureWrappers;
 using EasyBus.Kafka.Options;
 using Microsoft.Extensions.Logging;
 
-namespace EasyBus.AzureServiceBus.Receiving;
+namespace EasyBus.Kafka.Receiving;
 
-public class KafkaTopicInfrastructureReceiver<T> : IInfrastructureReceiver, IDisposable
+public class KafkaInfrastructureReceiver<T> : IInfrastructureReceiver, IDisposable
 {
     private readonly KafkaConnectionOptions _kafkaConnectionOptions;
     private readonly IKafkaMessageHandler<T> _messageHandler;
     private readonly string _topicName;
     private readonly string _consumerGroupName;
-    private readonly ILogger<KafkaTopicInfrastructureReceiver<T>> _logger;
+    private readonly ILogger<KafkaInfrastructureReceiver<T>> _logger;
     private IConsumer<Ignore, string>? _consumer;
+    private Task? _subscriberTask;
 
-
-    public KafkaTopicInfrastructureReceiver(KafkaConnectionOptions kafkaConnectionOptions,
+    public KafkaInfrastructureReceiver(KafkaConnectionOptions kafkaConnectionOptions,
         IKafkaMessageHandler<T> messageHandler,
         string topicName,
         string consumerGroupName,
-        ILogger<KafkaTopicInfrastructureReceiver<T>> logger)
+        ILogger<KafkaInfrastructureReceiver<T>> logger)
     {
         _kafkaConnectionOptions = kafkaConnectionOptions;
         _messageHandler = messageHandler;
@@ -30,7 +30,7 @@ public class KafkaTopicInfrastructureReceiver<T> : IInfrastructureReceiver, IDis
         _logger = logger;
     }
 
-    public async Task StartReceiving(CancellationToken cancellationToken)
+    public Task StartReceiving(CancellationToken cancellationToken)
     {
         _consumer = new ConsumerBuilder<Ignore, string>(GetConfig())
             .SetErrorHandler(ErrorHandler)
@@ -38,12 +38,14 @@ public class KafkaTopicInfrastructureReceiver<T> : IInfrastructureReceiver, IDis
 
         _consumer.Subscribe(_topicName);
 
-        _ = Task.Run(async () =>
+        _subscriberTask = Task.Run(async () =>
         {
             var message = _consumer.Consume();
             var @event = JsonSerializer.Deserialize<T>(message.Message.Value).AssertNull();
             await _messageHandler.Handle(message.AssertNull(), @event);
         }, cancellationToken);
+        
+        return Task.CompletedTask;
     }
 
     private IEnumerable<KeyValuePair<string, string>> GetConfig() => new ConsumerConfig
@@ -67,6 +69,8 @@ public class KafkaTopicInfrastructureReceiver<T> : IInfrastructureReceiver, IDis
 
     public void Dispose()
     {
+        _consumer?.Unsubscribe();
         _consumer?.Dispose();
+        _subscriberTask?.Dispose();
     }
 }

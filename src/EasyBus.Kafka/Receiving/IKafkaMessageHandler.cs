@@ -1,6 +1,6 @@
 using Confluent.Kafka;
 
-namespace EasyBus.AzureServiceBus.Receiving;
+namespace EasyBus.Kafka.Receiving;
 
 public interface IKafkaMessageHandler<in T>
 {

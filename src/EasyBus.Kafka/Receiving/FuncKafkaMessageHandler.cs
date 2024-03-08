@@ -1,19 +1,18 @@
 using Confluent.Kafka;
-using Microsoft.Extensions.Logging;
 
-namespace EasyBus.AzureServiceBus.Receiving;
+namespace EasyBus.Kafka.Receiving;
 
 public class FuncKafkaMessageHandler<T> : IKafkaMessageHandler<T>
 {
-    private readonly ILogger<FuncKafkaMessageHandler<T>> _logger;
+    private readonly Func<ConsumeResult<Ignore, string>, T, Task> _handler;
 
-    public FuncKafkaMessageHandler(ILogger<FuncKafkaMessageHandler<T>> logger)
+    public FuncKafkaMessageHandler(Func<ConsumeResult<Ignore, string> , T , Task> handler)
     {
-        _logger = logger;
+        _handler = handler;
     }
     
-    public Task Handle(ConsumeResult<Ignore, string> message, T @event)
+    public async Task Handle(ConsumeResult<Ignore, string> message, T @event)
     {
-        throw new NotImplementedException();
+        await _handler(message, @event);
     }
 }
