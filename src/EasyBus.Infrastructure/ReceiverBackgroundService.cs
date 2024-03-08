@@ -14,9 +14,17 @@ public class ReceiverBackgroundService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        await Task.Yield();
+        
         foreach (var receiver in _receivers)
         {
             await receiver.StartReceiving(stoppingToken);
         }
+
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            await Task.Delay(1000, stoppingToken);
+        }
+        Console.WriteLine("Camcelled");
     }
 }

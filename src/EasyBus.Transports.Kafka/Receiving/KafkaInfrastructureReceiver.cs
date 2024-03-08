@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace EasyBus.Transports.Kafka.Receiving;
 
-public class KafkaInfrastructureReceiver<T> : IInfrastructureReceiver, IDisposable
+public class KafkaInfrastructureReceiver<T> : IInfrastructureReceiver, IAsyncDisposable
 {
     private readonly KafkaConnectionOptions _kafkaConnectionOptions;
     private readonly IKafkaMessageHandler<T> _messageHandler;
@@ -16,6 +16,8 @@ public class KafkaInfrastructureReceiver<T> : IInfrastructureReceiver, IDisposab
     private readonly ILogger<KafkaInfrastructureReceiver<T>> _logger;
     private IConsumer<Ignore, string>? _consumer;
     private Task? _subscriberTask;
+    private CancellationTokenSource? _subscriberCts;
+    private bool _taskFinished;
 
     public KafkaInfrastructureReceiver(KafkaConnectionOptions kafkaConnectionOptions,
         IKafkaMessageHandler<T> messageHandler,
@@ -38,15 +40,18 @@ public class KafkaInfrastructureReceiver<T> : IInfrastructureReceiver, IDisposab
 
         _consumer.Subscribe(_topicName);
 
+        _subscriberCts = new CancellationTokenSource();
         _subscriberTask = Task.Run(async () =>
         {
-            while (true)
+            while (!_subscriberCts.IsCancellationRequested) //todo ct token
             {
-                var message = _consumer.Consume();
+                var message = _consumer.Consume(_subscriberCts.Token);
                 var @event = JsonSerializer.Deserialize<T>(message.Message.Value).AssertNull();
                 Console.WriteLine(_messageHandler.GetType().FullName);
                 await _messageHandler.Handle(message.AssertNull(), @event);
             }
+
+            _taskFinished = true;
         }, cancellationToken);
 
         return Task.CompletedTask;
@@ -71,8 +76,12 @@ public class KafkaInfrastructureReceiver<T> : IInfrastructureReceiver, IDisposab
         _logger.LogError("Got error during publishing message {Error} {ConsumerName}", error, consumer.Name);
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
+        _subscriberCts?.Cancel();
+        while (!_taskFinished) await Task.Delay(10);
+
+        _subscriberCts?.Dispose();
         _consumer?.Unsubscribe();
         _consumer?.Dispose();
         _subscriberTask?.Dispose();
