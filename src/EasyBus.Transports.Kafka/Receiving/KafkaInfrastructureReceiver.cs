@@ -47,7 +47,6 @@ public class KafkaInfrastructureReceiver<T> : IInfrastructureReceiver, IAsyncDis
             {
                 var message = _consumer.Consume(_subscriberCts.Token);
                 var @event = JsonSerializer.Deserialize<T>(message.Message.Value).AssertNull();
-                Console.WriteLine(_messageHandler.GetType().FullName);
                 await _messageHandler.Handle(message.AssertNull(), @event);
             }
 

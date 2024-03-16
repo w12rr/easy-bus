@@ -23,6 +23,7 @@ public class KafkaInfrastructurePublisher<T> : IInfrastructurePublisher<T>
     public async Task Publish(T @event, CancellationToken cancellationToken)
     {
         using var publisher = CreatePublisher();
+        Console.WriteLine($"Publishing on topic: {_topic}");
         await publisher.ProduceAsync(_topic, CreateMessage(@event), cancellationToken);
     }
 

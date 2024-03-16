@@ -11,7 +11,7 @@ public static class OutboxDependencyInjectionExtensions
         config.Services.AddScoped<IOutboxPublisher, OutboxPublisher>();
         config.Services.AddScoped<IMissingTableCreator, MissingTableCreator>();
         config.Services.AddScoped<IOutboxFromDbToTransportWriter, OutboxFromDbToTransportWriter>();
-        config.Services.AddScoped<IOutboxRepository>(_ => new OutboxRepository(dbConnectionString));
+        config.Services.AddTransient<IOutboxRepository>(_ => new OutboxRepository(dbConnectionString));
     }
 
     public static void AddOutboxMessagesProcessor(this PublisherConfiguration config)

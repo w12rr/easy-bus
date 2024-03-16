@@ -28,7 +28,11 @@ public static class SqlServerQueries
                                                           ALLOW_PAGE_LOCKS = ON,
                                                           OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF
                                                       ) ON [PRIMARY]
-                                              ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+                                              ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY];
+                                              
+                                              
+                                              ALTER TABLE [dbo].[Outboxes] ADD  DEFAULT (newid()) FOR [Id];
+                                              
                                           END
                                       """;
 }

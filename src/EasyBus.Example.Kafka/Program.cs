@@ -24,7 +24,7 @@ builder.ConfigureServices(services =>
         {
             pub.AddKafkaEventPublisher<TestEvent>("kafka_name", "my-topic");
             
-            pub.AddOutboxPublisher("Server=localhost;Database=easy-bus;User Id=sa;Password=StrongPASSWORD123!@#;");
+            pub.AddOutboxPublisher("Server=localhost;Database=easy-bus;User Id=sa;Password=StrongPASSWORD123!@#;TrustServerCertificate=true");
             pub.AddOutboxMessagesProcessor();
         });
 

@@ -17,7 +17,8 @@ public class LocalRunner : BackgroundService
     {
         await Task.Yield();
 
-        await _publisher.Publish(new TestEvent(Guid.NewGuid(), "this is another message"), CancellationToken.None);
+        var testEvent = new TestEvent(Guid.NewGuid(), "this is another message");
+        await _publisher.Publish(testEvent, CancellationToken.None);
 
         Console.WriteLine("Published");
     }

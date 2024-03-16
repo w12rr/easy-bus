@@ -1,4 +1,6 @@
-﻿using EasyBus.Core.Helpers;
+﻿using System.Data.Common;
+using System.Transactions;
+using EasyBus.Core.Helpers;
 using EasyBus.Outbox.Core;
 using Microsoft.Data.SqlClient;
 
@@ -38,6 +40,7 @@ public class OutboxRepository : IOutboxRepository, IAsyncDisposable
                 Data = reader.GetString(2)
             });
         }
+
         return data;
     }
 
@@ -53,19 +56,31 @@ public class OutboxRepository : IOutboxRepository, IAsyncDisposable
         var transaction = await StartConnectionIfNotStarted(cancellationToken);
         await using var cmd = new SqlCommand(SqlServerQueries.Insert, transaction.Connection, transaction);
         cmd.Parameters.AddWithValue("@Type", type);
-        cmd.Parameters.AddWithValue("@Type", data);
+        cmd.Parameters.AddWithValue("@Data", data);
         await cmd.ExecuteNonQueryAsync(cancellationToken);
     }
 
     public async Task SaveChanges(CancellationToken cancellationToken)
     {
         await _transaction.AssertNull().CommitAsync(cancellationToken);
+        
+        if (_connection != null) await _connection.DisposeAsync();
+        if (_transaction != null) await _transaction.DisposeAsync();
+        
+        _transaction = default;
+        _connection = default; //todo ok w ten sposob?
     }
 
     public async Task DiscardChanges(CancellationToken cancellationToken)
     {
         if (_transaction is not null)
             await _transaction.RollbackAsync(cancellationToken);
+
+        if (_connection != null) await _connection.DisposeAsync();
+        if (_transaction != null) await _transaction.DisposeAsync();
+
+        _transaction = default;
+        _connection = default; //todo ok w ten sposob?
     }
 
     private async Task<SqlTransaction> StartConnectionIfNotStarted(CancellationToken cancellationToken)
@@ -75,7 +90,6 @@ public class OutboxRepository : IOutboxRepository, IAsyncDisposable
         _connection = new SqlConnection(_connectionString);
         await _connection.OpenAsync(cancellationToken);
         _transaction = _connection.BeginTransaction();
-
         return _transaction;
     }
 

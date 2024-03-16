@@ -23,7 +23,7 @@ public class OutboxPublisher : IOutboxPublisher
         await _outboxRepository.SaveChanges(cancellationToken);
     }
 
-    public async Task Publish<T>(SqlTransaction transaction, T @event, CancellationToken cancellationToken)
+    public async Task Publish<T>(SqlTransaction _, T @event, CancellationToken cancellationToken)
         where T : notnull
     {
         var type = @event.GetType().AssemblyQualifiedName.AssertNull();
