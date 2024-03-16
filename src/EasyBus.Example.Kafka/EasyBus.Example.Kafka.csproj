@@ -10,6 +10,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\EasyBus.Inbox.Infrastructure\EasyBus.Inbox.Infrastructure.csproj" />
+      <ProjectReference Include="..\EasyBus.Inbox.Transports.Kafka\EasyBus.Inbox.Transports.Kafka.csproj" />
       <ProjectReference Include="..\EasyBus.Transports.Kafka\EasyBus.Transports.Kafka.csproj" />
       <ProjectReference Include="..\EasyBux.Outbox.Infrastructure\EasyBux.Outbox.Infrastructure.csproj" />
     </ItemGroup>

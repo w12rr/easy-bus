@@ -8,16 +8,17 @@ public class ConsumingRunner : IConsumingRunner
     private readonly IReadOnlyCollection<IInboxMessageReceiver> _messageReceivers;
     private readonly IInboxRepository _inboxRepository;
 
-    public ConsumingRunner(IReadOnlyCollection<IInboxMessageReceiver> messageReceivers,
+    public ConsumingRunner(IEnumerable<IInboxMessageReceiver> messageReceivers,
         IInboxRepository inboxRepository)
     {
-        _messageReceivers = messageReceivers;
+        _messageReceivers = messageReceivers.ToList().AsReadOnly();
         _inboxRepository = inboxRepository;
     }
     
     public async Task Run(CancellationToken cancellationToken)
     {
         var next = await GetNext(cancellationToken); //todo keep order of correlation id
+        Console.WriteLine("Found: " + next.Count());
         await ProcessNext(next, cancellationToken);
     }
     

@@ -1,5 +1,9 @@
-﻿using Confluent.Kafka;
+﻿using System.Text.Json;
+using Confluent.Kafka;
 using EasyBus.Example.Kafka;
+using EasyBus.Inbox.Core;
+using EasyBus.Inbox.Infrastructure;
+using EasyBus.Inbox.Transports.Kafka;
 using EasyBus.Infrastructure.DependencyInjection;
 using EasyBus.Transports.Kafka.DependencyInjection;
 using EasyBux.Outbox.Infrastructure;
@@ -28,7 +32,17 @@ builder.ConfigureServices(services =>
             pub.AddOutboxMessagesProcessor();
         });
 
-        config.AddReceiver(rec => { rec.AddKafkaReceiver<TestEvent>("kafka_name", "my-topic", "consumer_name"); });
+        config.AddReceiver(rec =>
+        {
+            rec.AddKafkaReceiver<TestEvent>("kafka_name", "my-topic", "consumer_name")
+                .SetInbox()
+                .SetInboxFuncHandler((sp, e, ct) =>
+                {
+                    Console.WriteLine("Received " + JsonSerializer.Serialize(e));
+                    return Task.FromResult(InboxMessageState.Received);
+                });
+            rec.AddInboxMessageConsumer("Server=localhost;Database=easy-bus;User Id=sa;Password=StrongPASSWORD123!@#;TrustServerCertificate=true");
+        });
     });
 
     services.AddHostedService<LocalRunner>();

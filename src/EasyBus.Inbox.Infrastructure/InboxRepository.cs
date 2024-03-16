@@ -4,65 +4,6 @@ using Microsoft.Data.SqlClient;
 
 namespace EasyBus.Inbox.Infrastructure;
 
-public static class SqlServerQueries
-{
-    public const string Insert =
-        "INSERT INTO [dbo].[Inboxes] (MessageId, Type, Data) VALUES (@MessageId, @Type, @Data)";
-
-    public const string UpdateTries =
-        "UPDATE [dbo].[Inboxes] SET TriesCount = @TriesCount, PickupDate = @PickupDate WHERE Id = @Id";
-
-    public const string SetReceived = "UPDATE [dbo].Outboxes SET Received = 1 WHERE Id = @Id";
-
-    public const string GetUnprocessed =
-        "SELECT Id, Type, Data, TriesCount FROM [dbo].[Inboxes] WHERE Received = 0 AND PickupDate <= GETDATE() AND TriesCount < 11";
-
-    public const string DeleteOldProcessed = "DELETE FROM [dbo].[Inboxes] WHERE Received = 1 AND InsertDate < @Date";
-
-    public const string CreateTable =
-        """
-            IF (NOT EXISTS (SELECT *
-                    FROM INFORMATION_SCHEMA.TABLES
-                    WHERE TABLE_SCHEMA = 'dbo'
-                    AND  TABLE_NAME = 'Inboxes'))
-            BEGIN
-                SET ANSI_NULLS ON
-                GO
-                
-                SET QUOTED_IDENTIFIER ON
-                GO
-                
-                CREATE TABLE [dbo].[Inboxes](
-        	        [Id] [uniqueidentifier] NOT NULL,
-        	        [MessageId] [nvarchar](450) NOT NULL,
-        	        [Type] [nvarchar](max) NOT NULL,
-        	        [Data] [nvarchar](max) NOT NULL,
-        	        [Received] [bit] NOT NULL,
-        	        [TriesCount] [int] NOT NULL,
-        	        [PickupDate] [datetime2](7) NOT NULL,
-        	        [InsertDate] [datetime2](7) NOT NULL,
-                 CONSTRAINT [PK_Inboxes] PRIMARY KEY CLUSTERED 
-                (
-        	        [Id] ASC
-                )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-                ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
-                GO
-                
-                ALTER TABLE [dbo].[Inboxes] ADD  DEFAULT ((0)) FOR [Received]
-                GO
-                
-                ALTER TABLE [dbo].[Inboxes] ADD  DEFAULT ((0)) FOR [TriesCount]
-                GO
-                
-                ALTER TABLE [dbo].[Inboxes] ADD  DEFAULT (getdate()) FOR [PickupDate]
-                GO
-                
-                ALTER TABLE [dbo].[Inboxes] ADD  DEFAULT (getdate()) FOR [InsertDate]
-                GO
-            END
-        """;
-}
-
 public class InboxRepository : IInboxRepository, IAsyncDisposable
 {
     private readonly string _connectionString;
@@ -141,15 +82,23 @@ public class InboxRepository : IInboxRepository, IAsyncDisposable
     public async Task SaveChanges(CancellationToken cancellationToken)
     {
         await _transaction.AssertNull().CommitAsync(cancellationToken);
+        
+        if (_connection != null) await _connection.DisposeAsync();
+        if (_transaction != null) await _transaction.DisposeAsync();
+        
+        _transaction = default;
+        _connection = default; //todo ok w ten sposob?
     }
 
+    //todo discard changes
+    
     private async Task<SqlTransaction> StartConnectionIfNotStarted(CancellationToken cancellationToken)
     {
         if (_transaction is not null) return _transaction;
 
         _connection = new SqlConnection(_connectionString);
-        _transaction = _connection.BeginTransaction();
         await _connection.OpenAsync(cancellationToken);
+        _transaction = _connection.BeginTransaction();
 
         return _transaction;
     }

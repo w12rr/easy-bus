@@ -16,6 +16,7 @@ public class InboxMessageIntoDbWriter<T> : IInboxMessageIntoDbWriter<T>
 
     public async Task<bool> WriteIntoDb(T @event, CancellationToken cancellationToken)
     {
+        Console.WriteLine("Consuimg in inbox");
         var messageId = _messageIdProvider(@event);
         var type = typeof(T).AssemblyQualifiedName.AssertNull();
         var json = JsonSerializer.Serialize(@event);

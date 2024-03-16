@@ -45,9 +45,19 @@ public class KafkaInfrastructureReceiver<T> : IInfrastructureReceiver, IAsyncDis
         {
             while (!_subscriberCts.IsCancellationRequested) //todo ct token
             {
-                var message = _consumer.Consume(_subscriberCts.Token);
-                var @event = JsonSerializer.Deserialize<T>(message.Message.Value).AssertNull();
-                await _messageHandler.Handle(message.AssertNull(), @event);
+                try
+                {
+                    Console.WriteLine("before consume");
+                    var message = _consumer.Consume(_subscriberCts.Token);
+                    Console.WriteLine("Receiving " + _topicName);
+                    var @event = JsonSerializer.Deserialize<T>(message.Message.Value).AssertNull();
+                    await _messageHandler.Handle(message.AssertNull(), @event);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    throw;
+                }
             }
 
             _taskFinished = true;

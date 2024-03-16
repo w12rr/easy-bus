@@ -17,9 +17,17 @@ public class InboxConsumerBackgroundService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        await Task.Yield();
-        await _missingOutboxTableCreator.Create(stoppingToken);
-        await RunProcessing(stoppingToken);
+        try
+        {
+            await Task.Yield();
+            await _missingOutboxTableCreator.Create(stoppingToken);
+            await RunProcessing(stoppingToken);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
 
     private async Task RunProcessing(CancellationToken cancellationToken)
