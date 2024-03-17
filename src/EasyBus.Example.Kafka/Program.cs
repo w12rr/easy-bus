@@ -10,6 +10,7 @@ using EasyBux.Outbox.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Outbox.Databases.SqlServer;
 
 var builder = new HostBuilder();
 builder.ConfigureServices(services =>
@@ -26,11 +27,14 @@ builder.ConfigureServices(services =>
 
         config.AddPublisher(pub =>
         {
-            pub.AddKafkaEventPublisher<TestEvent>("kafka_name", "my-topic");
-        
-            pub.AddOutboxPublisher(
-                "Server=localhost;Database=easy-bus;User Id=sa;Password=StrongPASSWORD123!@#;TrustServerCertificate=true");
-            pub.AddOutboxMessagesProcessor();
+            pub.AddKafkaEventPublisher<TestEvent>("kafka_name", "my-stopic");
+
+            pub.AddOutboxServices(options =>
+            {
+                options.UseSqlServer();
+                options.UseConnectionString(
+                    "Server=localhost;Database=easy-bus;User Id=sa;Password=StrongPASSWORD123!@#;TrustServerCertificate=true");
+            });
         });
 
         config.AddReceiver(rec =>

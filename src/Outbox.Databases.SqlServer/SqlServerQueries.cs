@@ -1,4 +1,4 @@
-﻿namespace EasyBux.Outbox.Infrastructure;
+﻿namespace Outbox.Databases.SqlServer;
 
 public static class SqlServerQueries
 {

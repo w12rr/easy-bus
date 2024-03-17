@@ -3,6 +3,7 @@ using System.Transactions;
 using EasyBus.Core.Helpers;
 using EasyBus.Outbox.Core;
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Options;
 
 namespace EasyBux.Outbox.Infrastructure;
 
@@ -11,16 +12,19 @@ public class OutboxRepository : IOutboxRepository, IAsyncDisposable
     private readonly string _connectionString;
     private SqlConnection? _connection;
     private SqlTransaction? _transaction;
+    private readonly SqlQueriesOptions _sqlQueriesOptions;
 
-    public OutboxRepository(string connectionString)
+    public OutboxRepository(IOptions<OutboxConnectionStringOptions> connectionStringOptions,
+        IOptions<SqlQueriesOptions> options)
     {
-        _connectionString = connectionString;
+        _connectionString = connectionStringOptions.Value.ConnectionString;
+        _sqlQueriesOptions = options.Value;
     }
 
     public async Task Delete(Guid id, CancellationToken cancellationToken)
     {
         var transaction = await StartConnectionIfNotStarted(cancellationToken);
-        await using var cmd = new SqlCommand(SqlServerQueries.Delete, transaction.Connection, transaction);
+        await using var cmd = new SqlCommand(_sqlQueriesOptions.Delete, transaction.Connection, transaction);
         cmd.Parameters.AddWithValue("@Id", id);
         await cmd.ExecuteNonQueryAsync(cancellationToken);
     }
@@ -28,7 +32,7 @@ public class OutboxRepository : IOutboxRepository, IAsyncDisposable
     public async Task<IReadOnlyCollection<OutboxEntity>> GetNext(CancellationToken cancellationToken)
     {
         var transaction = await StartConnectionIfNotStarted(cancellationToken);
-        await using var cmd = new SqlCommand(SqlServerQueries.GetNext, transaction.Connection, transaction);
+        await using var cmd = new SqlCommand(_sqlQueriesOptions.GetNext, transaction.Connection, transaction);
         await using var reader = await cmd.ExecuteReaderAsync(cancellationToken);
         var data = new List<OutboxEntity>();
         while (await reader.ReadAsync(cancellationToken))
@@ -47,14 +51,14 @@ public class OutboxRepository : IOutboxRepository, IAsyncDisposable
     public async Task CreateNotExistingTable(CancellationToken cancellationToken)
     {
         var transaction = await StartConnectionIfNotStarted(cancellationToken);
-        await using var cmd = new SqlCommand(SqlServerQueries.CreateTable, transaction.Connection, transaction);
+        await using var cmd = new SqlCommand(_sqlQueriesOptions.CreateTable, transaction.Connection, transaction);
         await cmd.ExecuteNonQueryAsync(cancellationToken);
     }
 
     public async Task Insert(string type, string data, CancellationToken cancellationToken)
     {
         var transaction = await StartConnectionIfNotStarted(cancellationToken);
-        await using var cmd = new SqlCommand(SqlServerQueries.Insert, transaction.Connection, transaction);
+        await using var cmd = new SqlCommand(_sqlQueriesOptions.Insert, transaction.Connection, transaction);
         cmd.Parameters.AddWithValue("@Type", type);
         cmd.Parameters.AddWithValue("@Data", data);
         await cmd.ExecuteNonQueryAsync(cancellationToken);
@@ -63,10 +67,10 @@ public class OutboxRepository : IOutboxRepository, IAsyncDisposable
     public async Task SaveChanges(CancellationToken cancellationToken)
     {
         await _transaction.AssertNull().CommitAsync(cancellationToken);
-        
+
         if (_connection != null) await _connection.DisposeAsync();
         if (_transaction != null) await _transaction.DisposeAsync();
-        
+
         _transaction = default;
         _connection = default; //todo ok w ten sposob?
     }
