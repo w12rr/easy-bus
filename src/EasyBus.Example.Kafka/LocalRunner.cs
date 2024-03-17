@@ -17,9 +17,13 @@ public class LocalRunner : BackgroundService
     {
         await Task.Yield();
 
-        var testEvent = new TestEvent(Guid.NewGuid(), "this is another message");
-        await _publisher.Publish(testEvent, CancellationToken.None);
-
-        Console.WriteLine("Published");
+        var inc = 1;
+        
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            var testEvent = new TestEvent(Guid.NewGuid(), $"this is another message - {inc++}");
+            await _publisher.Publish(testEvent, CancellationToken.None);
+            await Task.Delay(2000, stoppingToken);
+        }
     }
 }

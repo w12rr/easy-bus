@@ -16,7 +16,7 @@ public class KafkaInboxConfiguration<T> : IInboxConfiguration<KafkaReceiverPostC
     public KafkaReceiverPostConfiguration<T> SetInboxFuncHandler(
         Func<IServiceProvider, T, CancellationToken, Task<InboxMessageState>> handler)
     {
-        _conf.Services.AddScoped<IInboxMessageReceiver<T>>(
+        _conf.Services.AddScoped<IInboxMessageReceiver>(
             sp => new FuncInboxMessageReceiver<T>(
                 async (@event, cancellationToken) => await handler(sp, @event, cancellationToken)));
         return _conf;
@@ -25,7 +25,7 @@ public class KafkaInboxConfiguration<T> : IInboxConfiguration<KafkaReceiverPostC
     public KafkaReceiverPostConfiguration<T> SetInboxHandler<THandler>()
         where THandler : class, IInboxMessageReceiver<T>
     {
-        _conf.Services.AddScoped<IInboxMessageReceiver<T>, THandler>();
+        _conf.Services.AddScoped<IInboxMessageReceiver, THandler>();
         return _conf;
     }
 }

@@ -47,7 +47,6 @@ public class KafkaInfrastructureReceiver<T> : IInfrastructureReceiver, IAsyncDis
             {
                 try
                 {
-                    Console.WriteLine("before consume");
                     var message = _consumer.Consume(_subscriberCts.Token);
                     Console.WriteLine("Receiving " + _topicName);
                     var @event = JsonSerializer.Deserialize<T>(message.Message.Value).AssertNull();

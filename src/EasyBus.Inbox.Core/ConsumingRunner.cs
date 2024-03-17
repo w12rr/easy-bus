@@ -18,7 +18,6 @@ public class ConsumingRunner : IConsumingRunner
     public async Task Run(CancellationToken cancellationToken)
     {
         var next = await GetNext(cancellationToken); //todo keep order of correlation id
-        Console.WriteLine("Found: " + next.Count());
         await ProcessNext(next, cancellationToken);
     }
     
@@ -32,15 +31,17 @@ public class ConsumingRunner : IConsumingRunner
 
             var targetEventObject = JsonSerializer.Deserialize(message.Data, targetEventType).AssertNull();
             var inboxState = await receiver.Receive(targetEventObject, cancellationToken);
-
+            
             if (inboxState is InboxMessageState.NotReceived)
             {
                 await UpdatePickupDate(message, cancellationToken);
+                continue;
             }
 
             if (inboxState is InboxMessageState.Received)
             {
                 await SetReceived(message.Id, cancellationToken);
+                continue;
             }
 
             throw new Exception("Invalid inbox action");

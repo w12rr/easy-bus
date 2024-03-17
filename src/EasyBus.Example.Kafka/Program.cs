@@ -27,21 +27,23 @@ builder.ConfigureServices(services =>
         config.AddPublisher(pub =>
         {
             pub.AddKafkaEventPublisher<TestEvent>("kafka_name", "my-topic");
-            
-            pub.AddOutboxPublisher("Server=localhost;Database=easy-bus;User Id=sa;Password=StrongPASSWORD123!@#;TrustServerCertificate=true");
+        
+            pub.AddOutboxPublisher(
+                "Server=localhost;Database=easy-bus;User Id=sa;Password=StrongPASSWORD123!@#;TrustServerCertificate=true");
             pub.AddOutboxMessagesProcessor();
         });
 
         config.AddReceiver(rec =>
         {
             rec.AddKafkaReceiver<TestEvent>("kafka_name", "my-topic", "consumer_name")
-                .SetInbox()
+                .SetInbox(x => x.Id.ToString())
                 .SetInboxFuncHandler((sp, e, ct) =>
                 {
-                    Console.WriteLine("Received " + JsonSerializer.Serialize(e));
+                    Console.WriteLine("Received " + e.SomeData);
                     return Task.FromResult(InboxMessageState.Received);
                 });
-            rec.AddInboxMessageConsumer("Server=localhost;Database=easy-bus;User Id=sa;Password=StrongPASSWORD123!@#;TrustServerCertificate=true");
+            rec.AddInboxMessageConsumer(
+                "Server=localhost;Database=easy-bus;User Id=sa;Password=StrongPASSWORD123!@#;TrustServerCertificate=true");
         });
     });
 

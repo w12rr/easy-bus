@@ -8,10 +8,10 @@ public static class SqlServerQueries
     public const string UpdateTries =
         "UPDATE [dbo].[Inboxes] SET TriesCount = @TriesCount, PickupDate = @PickupDate WHERE Id = @Id";
 
-    public const string SetReceived = "UPDATE [dbo].Outboxes SET Received = 1 WHERE Id = @Id";
+    public const string SetReceived = "UPDATE [dbo].[Inboxes] SET Received = 1 WHERE Id = @Id";
 
     public const string GetUnprocessed =
-        "SELECT Id, Type, Data, TriesCount FROM [dbo].[Inboxes] WHERE Received = 0 AND PickupDate <= GETDATE() AND TriesCount < 11";
+        "SELECT Id, Type, Data, TriesCount, InsertDate FROM [dbo].[Inboxes] WHERE Received = 0 AND PickupDate <= GETDATE() AND TriesCount < 11";
 
     public const string DeleteOldProcessed = "DELETE FROM [dbo].[Inboxes] WHERE Received = 1 AND InsertDate < @Date";
 
@@ -48,6 +48,8 @@ public static class SqlServerQueries
                 ALTER TABLE [dbo].[Inboxes] ADD  DEFAULT (getdate()) FOR [PickupDate]
                 
                 ALTER TABLE [dbo].[Inboxes] ADD  DEFAULT (getdate()) FOR [InsertDate]
+                
+                ALTER TABLE [dbo].[Inboxes] ADD  DEFAULT (newid()) FOR [Id];
             END
         """;
 }
