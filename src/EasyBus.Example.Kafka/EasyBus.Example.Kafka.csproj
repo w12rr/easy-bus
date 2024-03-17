@@ -9,6 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\EasyBus.Inbox.Databases.SqlServer\EasyBus.Inbox.Databases.SqlServer.csproj" />
       <ProjectReference Include="..\EasyBus.Inbox.Infrastructure\EasyBus.Inbox.Infrastructure.csproj" />
       <ProjectReference Include="..\EasyBus.Inbox.Transports.Kafka\EasyBus.Inbox.Transports.Kafka.csproj" />
       <ProjectReference Include="..\EasyBus.Transports.Kafka\EasyBus.Transports.Kafka.csproj" />
