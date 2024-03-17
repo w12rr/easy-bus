@@ -26,13 +26,12 @@ public static class DependencyInjectionExtensions
 
             config.AddPublisher(pub =>
             {
-                pub.AddKafkaEventPublisher<TestEvent>("kafka_name", "my-stopic");
+                pub.AddKafkaEventPublisher<TestEvent>("kafka_name", "my-topic");
 
-                pub.AddOutboxServices(options =>
+                pub.AddOutboxServices(opt =>
                 {
-                    options.UseSqlServer();
-                    options.UseConnectionString(
-                        "Server=localhost;Database=easy-bus;User Id=sa;Password=StrongPASSWORD123!@#;TrustServerCertificate=true");
+                    opt.UseSqlServer();
+                    opt.UseNamedConnectionString("DefaultConnection");
                 });
             });
 
@@ -53,8 +52,7 @@ public static class DependencyInjectionExtensions
                 rec.AddInboxMessageConsumer(opt =>
                 {
                     opt.UseSqlServer();
-                    opt.UseConnectionString(
-                        "Server=localhost;Database=easy-bus;User Id=sa;Password=StrongPASSWORD123!@#;TrustServerCertificate=true");
+                    opt.UseNamedConnectionString("DefaultConnection");
                 });
             });
         });
