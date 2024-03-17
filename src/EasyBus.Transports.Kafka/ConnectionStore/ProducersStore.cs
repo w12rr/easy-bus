@@ -8,14 +8,16 @@ namespace EasyBus.Transports.Kafka.ConnectionStore;
 public class ProducersStore : IProducersStore, IDisposable
 {
     private readonly ILogger<ProducersStore> _logger;
-    private readonly KafkaOptions _kafkaOptions;
-
+    private readonly KafkaConfigsOptions _kafkaConfigsOptions;
     private readonly Dictionary<string, IProducer<Null, string>> _producerBuilders = new();
+    private readonly KafkaCreatingOptions _creatingOptions;
 
-    public ProducersStore(IOptions<KafkaOptions> kafkaOptions, ILogger<ProducersStore> logger)
+    public ProducersStore(IOptions<KafkaConfigsOptions> kafkaConfigsOptions, ILogger<ProducersStore> logger,
+        IOptions<KafkaCreatingOptions> creatingOptions)
     {
         _logger = logger;
-        _kafkaOptions = kafkaOptions.Value;
+        _kafkaConfigsOptions = kafkaConfigsOptions.Value;
+        _creatingOptions = creatingOptions.Value;
     }
 
     public IProducer<Null, string> GetCachedByName(string name)
@@ -27,14 +29,16 @@ public class ProducersStore : IProducersStore, IDisposable
 
     private IProducer<Null, string> CreatePublisher(string name)
     {
-        var config = GetConfig(_kafkaOptions.Connections[name]);
+        var config = GetConfig(_kafkaConfigsOptions.Connections[name]);
 
-        return new ProducerBuilder<Null, string>(config)
-            .SetErrorHandler(ErrorHandler).Build();
+        var producerBuilder = _creatingOptions.ProducerBuilderFactory(config).SetErrorHandler(ErrorHandler);
+        _creatingOptions.ProducerBuilderInterceptor(producerBuilder);
+        return producerBuilder.Build();
     }
 
-    private static IEnumerable<KeyValuePair<string, string>> GetConfig(KafkaConnectionOptions options) =>
-        new ProducerConfig
+    private ProducerConfig GetConfig(KafkaConnectionOptions options)
+    {
+        var producerConfig = new ProducerConfig
         {
             SecurityProtocol = options.SecurityProtocol,
             SaslMechanism = options.SaslMechanism,
@@ -42,8 +46,11 @@ public class ProducersStore : IProducersStore, IDisposable
             SaslPassword = options.SaslPassword,
             SslKeyPassword = options.SslKeyPassword,
             SslKeystorePassword = options.SslKeystorePassword,
-            SaslUsername = options.SaslUsername
+            SaslUsername = options.SaslUsername,
         };
+        _creatingOptions.ProducerConfigInterceptor(producerConfig);
+        return producerConfig;
+    }
 
     private void ErrorHandler(IProducer<Null, string> consumer, Error error)
     {

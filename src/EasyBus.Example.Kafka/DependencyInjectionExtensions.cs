@@ -1,4 +1,5 @@
-﻿using Confluent.Kafka;
+﻿using System.Text.Json;
+using Confluent.Kafka;
 using EasyBus.Inbox.Core;
 using EasyBus.Inbox.Databases.SqlServer;
 using EasyBus.Inbox.Infrastructure;
@@ -22,11 +23,24 @@ public static class DependencyInjectionExtensions
                 options.BootstrapServers = new[] { "127.0.0.1:9092" };
                 options.SaslMechanism = SaslMechanism.Plain;
                 options.SecurityProtocol = SecurityProtocol.Plaintext;
+            },
+            options =>
+            {
+                options.ProducerConfigInterceptor = x =>
+                {
+                    x.SaslMechanism = SaslMechanism.Plain;
+                };
             });
 
             config.AddPublisher(pub =>
             {
-                pub.AddKafkaEventPublisher<TestEvent>("kafka_name", "my-topic");
+                pub.AddKafkaEventPublisher<TestEvent>("kafka_name", "my-topic", opt =>
+                {
+                    opt.MessageSerializer = x => JsonSerializer.Serialize(x, new JsonSerializerOptions
+                    {
+                        WriteIndented = true
+                    });
+                });
 
                 pub.AddOutboxServices(opt =>
                 {
