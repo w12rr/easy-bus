@@ -46,7 +46,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyBus.Inbox.Transports.Ka
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Databases", "Databases", "{701604F8-4C19-4C8A-933E-08E538AAC26D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Outbox.Databases.SqlServer", "src\Outbox.Databases.SqlServer\Outbox.Databases.SqlServer.csproj", "{EE036225-9354-4E7E-BA63-7631764522C2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyBus.Outbox.Databases.SqlServer", "src\EasyBus.Outbox.Databases.SqlServer\EasyBus.Outbox.Databases.SqlServer.csproj", "{EE036225-9354-4E7E-BA63-7631764522C2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

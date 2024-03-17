@@ -13,7 +13,7 @@
       <ProjectReference Include="..\EasyBus.Inbox.Transports.Kafka\EasyBus.Inbox.Transports.Kafka.csproj" />
       <ProjectReference Include="..\EasyBus.Transports.Kafka\EasyBus.Transports.Kafka.csproj" />
       <ProjectReference Include="..\EasyBux.Outbox.Infrastructure\EasyBux.Outbox.Infrastructure.csproj" />
-      <ProjectReference Include="..\Outbox.Databases.SqlServer\Outbox.Databases.SqlServer.csproj" />
+      <ProjectReference Include="..\EasyBus.Outbox.Databases.SqlServer\EasyBus.Outbox.Databases.SqlServer.csproj" />
     </ItemGroup>
 
     <ItemGroup>

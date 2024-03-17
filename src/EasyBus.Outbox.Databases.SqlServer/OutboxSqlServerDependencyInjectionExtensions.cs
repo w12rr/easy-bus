@@ -1,7 +1,7 @@
 ﻿using EasyBux.Outbox.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Outbox.Databases.SqlServer;
+namespace EasyBus.Outbox.Databases.SqlServer;
 
 public static class OutboxSqlServerDependencyInjectionExtensions
 {

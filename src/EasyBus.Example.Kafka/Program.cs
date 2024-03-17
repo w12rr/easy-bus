@@ -5,12 +5,12 @@ using EasyBus.Inbox.Core;
 using EasyBus.Inbox.Infrastructure;
 using EasyBus.Inbox.Transports.Kafka;
 using EasyBus.Infrastructure.DependencyInjection;
+using EasyBus.Outbox.Databases.SqlServer;
 using EasyBus.Transports.Kafka.DependencyInjection;
 using EasyBux.Outbox.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Outbox.Databases.SqlServer;
 
 var builder = new HostBuilder();
 builder.ConfigureServices(services =>
