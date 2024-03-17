@@ -10,14 +10,11 @@ public class ProducersStore : IProducersStore, IDisposable
     private readonly ILogger<ProducersStore> _logger;
     private readonly KafkaConfigsOptions _kafkaConfigsOptions;
     private readonly Dictionary<string, IProducer<Null, string>> _producerBuilders = new();
-    private readonly KafkaCreatingOptions _creatingOptions;
 
-    public ProducersStore(IOptions<KafkaConfigsOptions> kafkaConfigsOptions, ILogger<ProducersStore> logger,
-        IOptions<KafkaCreatingOptions> creatingOptions)
+    public ProducersStore(IOptions<KafkaConfigsOptions> kafkaConfigsOptions, ILogger<ProducersStore> logger)
     {
         _logger = logger;
         _kafkaConfigsOptions = kafkaConfigsOptions.Value;
-        _creatingOptions = creatingOptions.Value;
     }
 
     public IProducer<Null, string> GetCachedByName(string name)
@@ -29,14 +26,15 @@ public class ProducersStore : IProducersStore, IDisposable
 
     private IProducer<Null, string> CreatePublisher(string name)
     {
-        var config = GetConfig(_kafkaConfigsOptions.Connections[name]);
+        var kafkaConnectionOptions = _kafkaConfigsOptions.Connections[name];
+        var config = GetConfig(kafkaConnectionOptions);
 
-        var producerBuilder = _creatingOptions.ProducerBuilderFactory(config).SetErrorHandler(ErrorHandler);
-        _creatingOptions.ProducerBuilderInterceptor(producerBuilder);
+        var producerBuilder = kafkaConnectionOptions.ProducerBuilderFactory(config).SetErrorHandler(ErrorHandler);
+        kafkaConnectionOptions.ProducerBuilderInterceptor(producerBuilder);
         return producerBuilder.Build();
     }
 
-    private ProducerConfig GetConfig(KafkaConnectionOptions options)
+    private static ProducerConfig GetConfig(KafkaConnectionOptions options)
     {
         var producerConfig = new ProducerConfig
         {
@@ -48,7 +46,7 @@ public class ProducersStore : IProducersStore, IDisposable
             SslKeystorePassword = options.SslKeystorePassword,
             SaslUsername = options.SaslUsername,
         };
-        _creatingOptions.ProducerConfigInterceptor(producerConfig);
+        options.ProducerConfigInterceptor(producerConfig);
         return producerConfig;
     }
 

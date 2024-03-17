@@ -11,4 +11,9 @@ public sealed class KafkaConnectionOptions
     public string SslKeyPassword { get; set; } = string.Empty;
     public string SslKeystorePassword { get; set; } = string.Empty;
     public string SaslUsername { get; set; } = string.Empty;
+    
+    public Action<ProducerConfig> ProducerConfigInterceptor { get; set; } = x => { };
+    public Action<ProducerBuilder<Null, string>> ProducerBuilderInterceptor { get; set; } = x => { };
+    public Func<ProducerConfig, ProducerBuilder<Null, string>> ProducerBuilderFactory { get; set; } =
+        x => new ProducerBuilder<Null, string>(x);
 }

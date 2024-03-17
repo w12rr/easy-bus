@@ -23,9 +23,6 @@ public static class DependencyInjectionExtensions
                 options.BootstrapServers = new[] { "127.0.0.1:9092" };
                 options.SaslMechanism = SaslMechanism.Plain;
                 options.SecurityProtocol = SecurityProtocol.Plaintext;
-            },
-            options =>
-            {
                 options.ProducerConfigInterceptor = x =>
                 {
                     x.SaslMechanism = SaslMechanism.Plain;
@@ -34,8 +31,10 @@ public static class DependencyInjectionExtensions
 
             config.AddPublisher(pub =>
             {
-                pub.AddKafkaEventPublisher<TestEvent>("kafka_name", "my-topic", opt =>
+                pub.AddKafkaEventPublisher<TestEvent>(opt =>
                 {
+                    opt.Topic = "my-topic";
+                    opt.MessageQueueName = "kafka_name";
                     opt.MessageSerializer = x => JsonSerializer.Serialize(x, new JsonSerializerOptions
                     {
                         WriteIndented = true

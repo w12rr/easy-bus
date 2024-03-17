@@ -10,25 +10,21 @@ namespace EasyBus.Transports.Kafka.Publishing;
 
 public class KafkaInfrastructurePublisher<T> : IInfrastructurePublisher<T>
 {
-    private readonly string _topic;
-    private readonly string _mqName;
     private readonly IProducersStore _producersStore;
     private readonly KafkaMessagePublisherOptions<T> _messagePublisherOptions;
 
-    public KafkaInfrastructurePublisher(string topic, string mqName, IProducersStore producersStore,
+    public KafkaInfrastructurePublisher(IProducersStore producersStore,
         KafkaMessagePublisherOptions<T> messagePublisherOptions)
     {
-        _topic = topic;
-        _mqName = mqName;
         _producersStore = producersStore;
         _messagePublisherOptions = messagePublisherOptions;
     }
 
     public async Task Publish(T @event, CancellationToken cancellationToken)
     {
-        var publisher = _producersStore.GetCachedByName(_mqName);
-        Console.WriteLine($"Publishing on topic: {_topic}");
-        await publisher.ProduceAsync(_topic, CreateMessage(@event), cancellationToken);
+        var publisher = _producersStore.GetCachedByName(_messagePublisherOptions.MessageQueueName);
+        Console.WriteLine($"Publishing on topic: {_messagePublisherOptions.Topic}");
+        await publisher.ProduceAsync(_messagePublisherOptions.Topic, CreateMessage(@event), cancellationToken);
     }
 
     private Message<Null, string> CreateMessage(T @event)

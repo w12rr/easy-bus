@@ -13,12 +13,9 @@ namespace EasyBus.Transports.Kafka.DependencyInjection;
 public static class KafkaDependencyInjectionExtensions
 {
     public static void AddKafka(this MessageQueueConfiguration mqConfiguration, string name,
-        Action<KafkaConnectionOptions> kafkaOptionsConfig,
-        Action<KafkaCreatingOptions>? creatingConfig = default)
+        Action<KafkaConnectionOptions> kafkaOptionsConfig)
     {
         mqConfiguration.Services.AddOptions<KafkaConfigsOptions>();
-        mqConfiguration.Services.AddOptions<KafkaCreatingOptions>()
-            .Configure(opt => creatingConfig?.Invoke(opt));
         mqConfiguration.Services.PostConfigure<KafkaConfigsOptions>(opt =>
         {
             var asbOpt = new KafkaConnectionOptions();
@@ -29,19 +26,11 @@ public static class KafkaDependencyInjectionExtensions
     }
 
     public static void AddKafkaEventPublisher<T>(this PublisherConfiguration configuration,
-        string mqName,
-        string topic,
         Action<KafkaMessagePublisherOptions<T>>? kafkaMessagePublisherOptionsConfig = default)
     {
         configuration.Services.AddOptions<KafkaMessagePublisherOptions<T>>()
             .Configure(x => kafkaMessagePublisherOptionsConfig?.Invoke(x));
-        configuration.Services.AddScoped<IInfrastructurePublisher, KafkaInfrastructurePublisher<T>>(
-            sp =>
-            {
-                var producerStore = sp.GetRequiredService<IProducersStore>();
-                var messagePublisherOptions = sp.GetRequiredService<KafkaMessagePublisherOptions<T>>();
-                return new KafkaInfrastructurePublisher<T>(topic, mqName, producerStore, messagePublisherOptions);
-            });
+        configuration.Services.AddScoped<IInfrastructurePublisher, KafkaInfrastructurePublisher<T>>();
     }
 
     public static void AddKafkaReceiver<T>(this ReceiverConfiguration configuration,
