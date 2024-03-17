@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using Confluent.Kafka;
 using EasyBus.Core.InfrastructureWrappers;
+using EasyBus.Transports.Kafka.ConnectionStore;
 using EasyBus.Transports.Kafka.Options;
 using Microsoft.Extensions.Logging;
 
@@ -8,21 +9,20 @@ namespace EasyBus.Transports.Kafka.Publishing;
 
 public class KafkaInfrastructurePublisher<T> : IInfrastructurePublisher<T>
 {
-    private readonly KafkaConnectionOptions _kafkaConnectionOptions;
     private readonly string _topic;
-    private readonly ILogger<KafkaInfrastructurePublisher<T>> _logger;
+    private readonly string _mqName;
+    private readonly IProducersStore _producersStore;
 
-    public KafkaInfrastructurePublisher(KafkaConnectionOptions kafkaConnectionOptions, string topic,
-        ILogger<KafkaInfrastructurePublisher<T>> logger)
+    public KafkaInfrastructurePublisher(string topic, string mqName, IProducersStore producersStore)
     {
-        _kafkaConnectionOptions = kafkaConnectionOptions;
         _topic = topic;
-        _logger = logger;
+        _mqName = mqName;
+        _producersStore = producersStore;
     }
 
     public async Task Publish(T @event, CancellationToken cancellationToken)
     {
-        using var publisher = CreatePublisher();
+        var publisher = _producersStore.GetCachedByName(_mqName);
         Console.WriteLine($"Publishing on topic: {_topic}");
         await publisher.ProduceAsync(_topic, CreateMessage(@event), cancellationToken);
     }
@@ -35,26 +35,5 @@ public class KafkaInfrastructurePublisher<T> : IInfrastructurePublisher<T>
     public async Task Publish(object @event, CancellationToken cancellationToken)
     {
         await Publish((T)@event, cancellationToken);
-    }
-
-    private IProducer<Null, string> CreatePublisher()
-    {
-        return new ProducerBuilder<Null, string>(GetConfig()).SetErrorHandler(ErrorHandler).Build();
-    }
-
-    private IEnumerable<KeyValuePair<string, string>> GetConfig() => new ProducerConfig
-    {
-        SecurityProtocol = _kafkaConnectionOptions.SecurityProtocol,
-        SaslMechanism = _kafkaConnectionOptions.SaslMechanism,
-        BootstrapServers = string.Join(",", _kafkaConnectionOptions.BootstrapServers),
-        SaslPassword = _kafkaConnectionOptions.SaslPassword,
-        SslKeyPassword = _kafkaConnectionOptions.SslKeyPassword,
-        SslKeystorePassword = _kafkaConnectionOptions.SslKeystorePassword,
-        SaslUsername = _kafkaConnectionOptions.SaslUsername
-    };
-
-    private void ErrorHandler(IProducer<Null, string> consumer, Error error)
-    {
-        _logger.LogError("Got error during publishing message {Error} {ConsumerName}", error, consumer.Name);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using EasyBus.Core.InfrastructureWrappers;
 using EasyBus.Infrastructure.DependencyInjection;
+using EasyBus.Transports.Kafka.ConnectionStore;
 using EasyBus.Transports.Kafka.Options;
 using EasyBus.Transports.Kafka.Publishing;
 using EasyBus.Transports.Kafka.Receiving;
@@ -21,19 +22,18 @@ public static class KafkaDependencyInjectionExtensions
             asbOptionsConfig(asbOpt);
             opt.Connections.Add(name, asbOpt);
         });
+        mqConfiguration.Services.AddSingleton<IProducersStore, ProducersStore>();
     }
 
     public static void AddKafkaEventPublisher<T>(this PublisherConfiguration configuration,
         string mqName,
         string topic)
     {
-        //todo others registrations IInfrastructurePublisher instead IInfrastructurePublisher<T>
         configuration.Services.AddScoped<IInfrastructurePublisher, KafkaInfrastructurePublisher<T>>(
             sp =>
             {
-                var options = sp.GetRequiredService<IOptions<KafkaOptions>>().Value.Connections[mqName];
-                var logger = sp.GetRequiredService<ILogger<KafkaInfrastructurePublisher<T>>>();
-                return new KafkaInfrastructurePublisher<T>(options, topic, logger);
+                var producerStore = sp.GetRequiredService<IProducersStore>();
+                return new KafkaInfrastructurePublisher<T>(topic, mqName, producerStore);
             });
     }
 
