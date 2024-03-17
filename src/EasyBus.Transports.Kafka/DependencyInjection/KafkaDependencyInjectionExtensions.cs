@@ -18,36 +18,27 @@ public static class KafkaDependencyInjectionExtensions
         mqConfiguration.Services.AddOptions<KafkaConfigsOptions>();
         mqConfiguration.Services.PostConfigure<KafkaConfigsOptions>(opt =>
         {
-            var asbOpt = new KafkaConnectionOptions();
-            kafkaOptionsConfig(asbOpt);
-            opt.Connections.Add(name, asbOpt);
+            var kafkaOpt = new KafkaConnectionOptions();
+            kafkaOptionsConfig(kafkaOpt);
+            opt.Connections.Add(name, kafkaOpt);
         });
         mqConfiguration.Services.AddSingleton<IProducersStore, ProducersStore>();
     }
 
     public static void AddKafkaEventPublisher<T>(this PublisherConfiguration configuration,
-        Action<KafkaMessagePublisherOptions<T>>? kafkaMessagePublisherOptionsConfig = default)
+        Action<KafkaMessagePublisherOptionsConfiguration<T>> publisherConfiguration)
     {
-        configuration.Services.AddOptions<KafkaMessagePublisherOptions<T>>()
-            .Configure(x => kafkaMessagePublisherOptionsConfig?.Invoke(x));
+        configuration.Services.AddOptions<KafkaMessagePublisherOptions<T>>();
+        publisherConfiguration(new KafkaMessagePublisherOptionsConfiguration<T>(configuration.Services));
         configuration.Services.AddScoped<IInfrastructurePublisher, KafkaInfrastructurePublisher<T>>();
     }
 
     public static void AddKafkaReceiver<T>(this ReceiverConfiguration configuration,
-        string mqName,
-        string topicName,
-        string consumerGroup,
-        Action<KafkaReceiverPostConfiguration<T>>? configAction = default)
+        Action<KafkaReceiverConfiguration<T>>? configAction = default)
     {
+        configuration.Services.AddOptions<KafkaInfrastructureMessageReceiverOptions<T>>();
         configuration.Services.AddScoped<IKafkaMessageHandler<T>, LoggerKafkaMessageHandler<T>>();
-        configuration.Services.AddScoped<IInfrastructureReceiver, KafkaInfrastructureReceiver<T>>(sp =>
-        {
-            var options = sp.GetRequiredService<IOptions<KafkaConfigsOptions>>().Value.Connections[mqName];
-            var logger = sp.GetRequiredService<ILogger<KafkaInfrastructureReceiver<T>>>();
-            var handler = sp.GetRequiredService<IKafkaMessageHandler<T>>();
-            return new KafkaInfrastructureReceiver<T>(options, handler, topicName, consumerGroup, logger);
-        });
-
-        configAction?.Invoke(new KafkaReceiverPostConfiguration<T>(configuration.Services));
+        configuration.Services.AddScoped<IInfrastructureReceiver, KafkaInfrastructureReceiver<T>>();
+        configAction?.Invoke(new KafkaReceiverConfiguration<T>(configuration.Services));
     }
 }

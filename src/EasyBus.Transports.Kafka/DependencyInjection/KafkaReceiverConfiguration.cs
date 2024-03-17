@@ -4,29 +4,36 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyBus.Transports.Kafka.DependencyInjection;
 
-public class KafkaReceiverPostConfiguration<T>
+public class KafkaReceiverConfiguration<T>
 {
     public IServiceCollection Services;
 
-    public KafkaReceiverPostConfiguration(IServiceCollection services)
+    public KafkaReceiverConfiguration(IServiceCollection services)
     {
         Services = services;
     }
 
-    public KafkaReceiverPostConfiguration<T> SetFuncHandler(
-        Func<IServiceProvider, ConsumeResult<Ignore, string>, T, Task> onSuccess)
+    public void SetFuncHandler(Func<IServiceProvider, ConsumeResult<Ignore, string>, T, Task> onSuccess)
     {
         Services.AddScoped<IKafkaMessageHandler<T>>(sp =>
         {
             return new FuncKafkaMessageHandler<T>(async (args, @event) => await onSuccess(sp, args, @event));
         });
-        return this;
     }
 
-    public KafkaReceiverPostConfiguration<T> SetHandler<THandler>()
+    public void SetHandler<THandler>()
         where THandler : class, IKafkaMessageHandler<T>
     {
         Services.AddScoped<IKafkaMessageHandler<T>, THandler>();
-        return this;
+    }
+
+    public void SetConsumer(string messageQueue, string topic, string consumerGroup)
+    {
+        Services.PostConfigure<KafkaInfrastructureMessageReceiverOptions<T>>(x =>
+        {
+            x.TopicName = topic;
+            x.ConsumerGroup = consumerGroup;
+            x.MessageQueueName = messageQueue;
+        });
     }
 }

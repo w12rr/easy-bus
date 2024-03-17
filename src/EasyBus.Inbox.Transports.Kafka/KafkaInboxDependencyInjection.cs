@@ -7,7 +7,7 @@ namespace EasyBus.Inbox.Transports.Kafka;
 public static class KafkaInboxDependencyInjection
 {
     public static void UseInbox<T>(
-        this KafkaReceiverPostConfiguration<T> conf,
+        this KafkaReceiverConfiguration<T> conf,
         Action<KafkaInboxConfiguration<T>> configAction)
     {
 

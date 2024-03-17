@@ -14,10 +14,10 @@ public class KafkaInfrastructurePublisher<T> : IInfrastructurePublisher<T>
     private readonly KafkaMessagePublisherOptions<T> _messagePublisherOptions;
 
     public KafkaInfrastructurePublisher(IProducersStore producersStore,
-        KafkaMessagePublisherOptions<T> messagePublisherOptions)
+        IOptions<KafkaMessagePublisherOptions<T>> messagePublisherOptions)
     {
         _producersStore = producersStore;
-        _messagePublisherOptions = messagePublisherOptions;
+        _messagePublisherOptions = messagePublisherOptions.Value;
     }
 
     public async Task Publish(T @event, CancellationToken cancellationToken)

@@ -6,9 +6,9 @@ namespace EasyBus.Inbox.Transports.Kafka;
 
 public class KafkaInboxConfiguration<T> : IInboxConfiguration<T>
 {
-    private readonly KafkaReceiverPostConfiguration<T> _conf;
+    private readonly KafkaReceiverConfiguration<T> _conf;
 
-    public KafkaInboxConfiguration(KafkaReceiverPostConfiguration<T> conf)
+    public KafkaInboxConfiguration(KafkaReceiverConfiguration<T> conf)
     {
         _conf = conf;
     }

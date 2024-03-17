@@ -23,22 +23,18 @@ public static class DependencyInjectionExtensions
                 options.BootstrapServers = new[] { "127.0.0.1:9092" };
                 options.SaslMechanism = SaslMechanism.Plain;
                 options.SecurityProtocol = SecurityProtocol.Plaintext;
-                options.ProducerConfigInterceptor = x =>
-                {
-                    x.SaslMechanism = SaslMechanism.Plain;
-                };
+                options.ProducerConfigInterceptor = x => { x.SaslMechanism = SaslMechanism.Plain; };
             });
 
             config.AddPublisher(pub =>
             {
                 pub.AddKafkaEventPublisher<TestEvent>(opt =>
                 {
-                    opt.Topic = "my-topic";
-                    opt.MessageQueueName = "kafka_name";
-                    opt.MessageSerializer = x => JsonSerializer.Serialize(x, new JsonSerializerOptions
+                    opt.SetPublisher("kafka_name", "my-topic");
+                    opt.SetMessageSerializer(x => JsonSerializer.Serialize(x, new JsonSerializerOptions
                     {
                         WriteIndented = true
-                    });
+                    }));
                 });
 
                 pub.AddOutboxServices(opt =>
@@ -50,8 +46,9 @@ public static class DependencyInjectionExtensions
 
             config.AddReceiver(rec =>
             {
-                rec.AddKafkaReceiver<TestEvent>("kafka_name", "my-topic", "consumer_name", kafkaRecConfig =>
+                rec.AddKafkaReceiver<TestEvent>(kafkaRecConfig =>
                 {
+                    kafkaRecConfig.SetConsumer("kafka_name", "my-topic", "consumer_name");
                     kafkaRecConfig.UseInbox(conf =>
                     {
                         conf.SetInboxFuncHandler((sp, e, ct) =>

@@ -4,6 +4,7 @@ using EasyBus.Core.Helpers;
 using EasyBus.Core.InfrastructureWrappers;
 using EasyBus.Transports.Kafka.Options;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace EasyBus.Transports.Kafka.Receiving;
 
@@ -11,34 +12,29 @@ public class KafkaInfrastructureReceiver<T> : IInfrastructureReceiver, IAsyncDis
 {
     private readonly KafkaConnectionOptions _kafkaConnectionOptions;
     private readonly IKafkaMessageHandler<T> _messageHandler;
-    private readonly string _topicName;
-    private readonly string _consumerGroupName;
     private readonly ILogger<KafkaInfrastructureReceiver<T>> _logger;
     private IConsumer<Ignore, string>? _consumer;
     private Task? _subscriberTask;
     private CancellationTokenSource? _subscriberCts;
     private bool _taskFinished;
+    private readonly KafkaInfrastructureMessageReceiverOptions<T> _kafkaInfrastructureMessageReceiverOptions;
 
-    public KafkaInfrastructureReceiver(KafkaConnectionOptions kafkaConnectionOptions,
+    public KafkaInfrastructureReceiver(IOptions<KafkaConfigsOptions> kafkaOptions,
         IKafkaMessageHandler<T> messageHandler,
-        string topicName,
-        string consumerGroupName,
-        ILogger<KafkaInfrastructureReceiver<T>> logger)
+        ILogger<KafkaInfrastructureReceiver<T>> logger,
+        IOptions<KafkaInfrastructureMessageReceiverOptions<T>> kafkaInfrastructureMessageReceiverOptions)
     {
-        _kafkaConnectionOptions = kafkaConnectionOptions;
+        _kafkaConnectionOptions = kafkaOptions.Value.Connections[kafkaInfrastructureMessageReceiverOptions.Value.MessageQueueName];
         _messageHandler = messageHandler;
-        _topicName = topicName;
-        _consumerGroupName = consumerGroupName;
         _logger = logger;
+        _kafkaInfrastructureMessageReceiverOptions = kafkaInfrastructureMessageReceiverOptions.Value;
     }
 
     public Task StartReceiving(CancellationToken cancellationToken)
     {
-        _consumer = new ConsumerBuilder<Ignore, string>(GetConfig())
-            .SetErrorHandler(ErrorHandler)
-            .Build();
+        _consumer = GetConsumer();
 
-        _consumer.Subscribe(_topicName);
+        _consumer.Subscribe(_kafkaInfrastructureMessageReceiverOptions.TopicName);
 
         _subscriberCts = new CancellationTokenSource();
         _subscriberTask = Task.Run(async () =>
@@ -48,9 +44,11 @@ public class KafkaInfrastructureReceiver<T> : IInfrastructureReceiver, IAsyncDis
                 try
                 {
                     var message = _consumer.Consume(_subscriberCts.Token);
-                    Console.WriteLine("Receiving " + _topicName);
-                    var @event = JsonSerializer.Deserialize<T>(message.Message.Value).AssertNull();
+                    _kafkaInfrastructureMessageReceiverOptions.BeforeMessageConsume(message);
+                    var @event = _kafkaInfrastructureMessageReceiverOptions.MessageDeserializer(message.Message.Value);
+                    _kafkaInfrastructureMessageReceiverOptions.AfterDeserializing(message, @event);
                     await _messageHandler.Handle(message.AssertNull(), @event);
+                    _kafkaInfrastructureMessageReceiverOptions.AfterMessageConsume(message, @event);
                 }
                 catch (Exception e)
                 {
@@ -65,19 +63,32 @@ public class KafkaInfrastructureReceiver<T> : IInfrastructureReceiver, IAsyncDis
         return Task.CompletedTask;
     }
 
-    private IEnumerable<KeyValuePair<string, string>> GetConfig() => new ConsumerConfig
+    private IConsumer<Ignore, string> GetConsumer()
     {
-        SecurityProtocol = _kafkaConnectionOptions.SecurityProtocol,
-        SaslMechanism = _kafkaConnectionOptions.SaslMechanism,
-        BootstrapServers = string.Join(",", _kafkaConnectionOptions.BootstrapServers),
-        SaslPassword = _kafkaConnectionOptions.SaslPassword,
-        SslKeyPassword = _kafkaConnectionOptions.SslKeyPassword,
-        SslKeystorePassword = _kafkaConnectionOptions.SslKeystorePassword,
-        SaslUsername = _kafkaConnectionOptions.SaslUsername,
-        AllowAutoCreateTopics = true,
-        AutoOffsetReset = AutoOffsetReset.Earliest,
-        GroupId = _consumerGroupName
-    };
+        var config = GetConfig();
+        var builder = _kafkaConnectionOptions.ConsumerBuilderFactory(config).SetErrorHandler(ErrorHandler);
+        _kafkaConnectionOptions.ConsumerBuilderInterceptor(builder);
+        return builder.Build();
+    }
+
+    private ConsumerConfig GetConfig()
+    {
+        var config = new ConsumerConfig
+        {
+            SecurityProtocol = _kafkaConnectionOptions.SecurityProtocol,
+            SaslMechanism = _kafkaConnectionOptions.SaslMechanism,
+            BootstrapServers = string.Join(",", _kafkaConnectionOptions.BootstrapServers),
+            SaslPassword = _kafkaConnectionOptions.SaslPassword,
+            SslKeyPassword = _kafkaConnectionOptions.SslKeyPassword,
+            SslKeystorePassword = _kafkaConnectionOptions.SslKeystorePassword,
+            SaslUsername = _kafkaConnectionOptions.SaslUsername,
+            AllowAutoCreateTopics = true,
+            AutoOffsetReset = AutoOffsetReset.Earliest,
+            GroupId = _kafkaInfrastructureMessageReceiverOptions.ConsumerGroup
+        };
+        _kafkaConnectionOptions.ConsumerConfigInterceptor(config);
+        return config;
+    }
 
     private void ErrorHandler(IConsumer<Ignore, string> consumer, Error error)
     {
