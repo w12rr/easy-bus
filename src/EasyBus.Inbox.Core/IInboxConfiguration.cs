@@ -1,9 +1,11 @@
 ﻿namespace EasyBus.Inbox.Core;
 
-public interface IInboxConfiguration<out TTransportConfiguration, out T>
+public interface IInboxConfiguration<out T>
 {
-    TTransportConfiguration SetInboxFuncHandler(
+    void SetInboxFuncHandler(
         Func<IServiceProvider, T, CancellationToken, Task<InboxMessageState>> handler);
-    TTransportConfiguration SetInboxHandler<THandler>()
+    void SetInboxHandler<THandler>()
         where THandler : class, IInboxMessageReceiver<T>;
+
+    void SetMessageIdProvider(Func<T, string> idProvider);
 }

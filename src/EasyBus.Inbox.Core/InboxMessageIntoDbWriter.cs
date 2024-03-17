@@ -5,10 +5,10 @@ namespace EasyBus.Inbox.Core;
 
 public class InboxMessageIntoDbWriter<T> : IInboxMessageIntoDbWriter<T>
 {
-    private readonly Func<T, string> _messageIdProvider;
+    private readonly IMessageIdProvider<T> _messageIdProvider;
     private readonly IInboxRepository _inboxRepository;
 
-    public InboxMessageIntoDbWriter(Func<T, string> messageIdProvider, IInboxRepository inboxRepository)
+    public InboxMessageIntoDbWriter(IMessageIdProvider<T> messageIdProvider, IInboxRepository inboxRepository)
     {
         _messageIdProvider = messageIdProvider;
         _inboxRepository = inboxRepository;
@@ -16,7 +16,7 @@ public class InboxMessageIntoDbWriter<T> : IInboxMessageIntoDbWriter<T>
 
     public async Task<bool> WriteIntoDb(T @event, CancellationToken cancellationToken)
     {
-        var messageId = _messageIdProvider(@event);
+        var messageId = _messageIdProvider.GetId(@event);
         var type = typeof(T).AssemblyQualifiedName.AssertNull();
         var json = JsonSerializer.Serialize(@event);
         await _inboxRepository.Insert(messageId, type, json, cancellationToken);

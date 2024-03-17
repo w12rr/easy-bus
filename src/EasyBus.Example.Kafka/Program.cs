@@ -39,13 +39,18 @@ builder.ConfigureServices(services =>
 
         config.AddReceiver(rec =>
         {
-            rec.AddKafkaReceiver<TestEvent>("kafka_name", "my-topic", "consumer_name")
-                .SetInbox(x => x.Id.ToString())
-                .SetInboxFuncHandler((sp, e, ct) =>
+            rec.AddKafkaReceiver<TestEvent>("kafka_name", "my-topic", "consumer_name", kafkaRecConfig =>
+            {
+                kafkaRecConfig.SetInbox(conf =>
                 {
-                    Console.WriteLine("Received " + e.SomeData);
-                    return Task.FromResult(InboxMessageState.Received);
+                    conf.SetInboxFuncHandler((sp, e, ct) =>
+                    {
+                        Console.WriteLine("Received " + e.SomeData);
+                        return Task.FromResult(InboxMessageState.Received);
+                    });
+                    conf.SetMessageIdProvider(x => x.Id.ToString());
                 });
+            });
             rec.AddInboxMessageConsumer(
                 "Server=localhost;Database=easy-bus;User Id=sa;Password=StrongPASSWORD123!@#;TrustServerCertificate=true");
         });

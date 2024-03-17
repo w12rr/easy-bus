@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyBus.Inbox.Transports.Kafka;
 
-public class KafkaInboxConfiguration<T> : IInboxConfiguration<KafkaReceiverPostConfiguration<T>, T>
+public class KafkaInboxConfiguration<T> : IInboxConfiguration<T>
 {
     private readonly KafkaReceiverPostConfiguration<T> _conf;
 
@@ -13,19 +13,22 @@ public class KafkaInboxConfiguration<T> : IInboxConfiguration<KafkaReceiverPostC
         _conf = conf;
     }
 
-    public KafkaReceiverPostConfiguration<T> SetInboxFuncHandler(
+    public void SetInboxFuncHandler(
         Func<IServiceProvider, T, CancellationToken, Task<InboxMessageState>> handler)
     {
         _conf.Services.AddScoped<IInboxMessageReceiver>(
             sp => new FuncInboxMessageReceiver<T>(
                 async (@event, cancellationToken) => await handler(sp, @event, cancellationToken)));
-        return _conf;
     }
 
-    public KafkaReceiverPostConfiguration<T> SetInboxHandler<THandler>()
+    public void SetInboxHandler<THandler>()
         where THandler : class, IInboxMessageReceiver<T>
     {
         _conf.Services.AddScoped<IInboxMessageReceiver, THandler>();
-        return _conf;
+    }
+
+    public void SetMessageIdProvider(Func<T, string> idProvider)
+    {
+        _conf.Services.AddTransient<IMessageIdProvider<T>>(_ => new MessageIdProvider<T>(idProvider));
     }
 }

@@ -37,10 +37,11 @@ public static class KafkaDependencyInjectionExtensions
             });
     }
 
-    public static KafkaReceiverPostConfiguration<T> AddKafkaReceiver<T>(this ReceiverConfiguration configuration,
+    public static void AddKafkaReceiver<T>(this ReceiverConfiguration configuration,
         string mqName,
         string topicName,
-        string consumerGroup)
+        string consumerGroup,
+        Action<KafkaReceiverPostConfiguration<T>>? configAction = default)
     {
         configuration.Services.AddScoped<IKafkaMessageHandler<T>, LoggerKafkaMessageHandler<T>>();
         configuration.Services.AddScoped<IInfrastructureReceiver, KafkaInfrastructureReceiver<T>>(sp =>
@@ -50,6 +51,7 @@ public static class KafkaDependencyInjectionExtensions
             var handler = sp.GetRequiredService<IKafkaMessageHandler<T>>();
             return new KafkaInfrastructureReceiver<T>(options, handler, topicName, consumerGroup, logger);
         });
-        return new KafkaReceiverPostConfiguration<T>(configuration.Services);
+        
+        configAction?.Invoke(new KafkaReceiverPostConfiguration<T>(configuration.Services));
     }
 }
